@@ -157,6 +157,35 @@ int KeyframeEffect::addKey(double time)
     return keyAt(time, 1e-9);
 }
 
+void KeyframeEffect::trim(double from, double to)
+{
+    from = std::clamp(from, 0.0, 1.0);
+    to = std::clamp(to, 0.0, 1.0);
+    const double span = to - from;
+    if (span < 1e-3)
+        return;
+    // addKey() reuses a key within its tolerance of the cut, so keys that close count as the ends.
+    constexpr double kTolerance = 0.0041;
+    addKey(from);
+    if (to < 0.999)
+        addKey(to);
+    std::vector<Keyframe> kept;
+    for (const Keyframe& k : m_keys) {
+        if (k.time < from - kTolerance || k.time > to + kTolerance)
+            continue;
+        Keyframe c = k;
+        // The end key sits just before the wrap, so the cut end shows until the loop jumps back to the start.
+        c.time = std::clamp((k.time - from) / span, 0.0, 0.999);
+        if (!kept.empty() && c.time - kept.back().time < 1e-6)
+            continue;
+        kept.push_back(std::move(c));
+    }
+    if (kept.empty())
+        return;
+    m_keys = std::move(kept);
+    sortKeys();
+}
+
 void KeyframeEffect::removeKey(int index)
 {
     if (m_keys.size() <= 1 || index < 0 || index >= keyCount())

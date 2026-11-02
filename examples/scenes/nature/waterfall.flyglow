@@ -1,0 +1,82 @@
+{
+ "format": "flyglow",
+ "version": 1,
+ "preset": {
+  "title": {
+   "en": "Waterfall",
+   "ru": "Водопад"
+  },
+  "description": {
+   "en": "A waterfall between mossy rocks.",
+   "ru": "Водопад между мшистых скал."
+  },
+  "controls": [
+   {
+    "type": "hue",
+    "label": {
+     "en": "Colour",
+     "ru": "Цвет"
+    },
+    "targets": [
+     {
+      "layer": 0
+     }
+    ],
+    "base": "#4088d8"
+   },
+   {
+    "type": "number",
+    "label": {
+     "en": "Glow",
+     "ru": "Свечение"
+    },
+    "min": 0,
+    "max": 100,
+    "step": 1,
+    "suffix": "%",
+    "targets": [
+     {
+      "layer": 0,
+      "prop": "glow",
+      "from": 0,
+      "to": 1
+     }
+    ]
+   }
+  ],
+  "cover": 0.2,
+  "tags": [
+   "waterfall",
+   "water",
+   "river",
+   "водопад",
+   "вода",
+   "река"
+  ],
+  "order": 210
+ },
+ "loopSeconds": 3.0,
+ "brightness": 100,
+ "outputGamma": 1.4,
+ "layers": [
+  {
+   "name": "Waterfall",
+   "visible": true,
+   "opacity": 1.0,
+   "blend": 0,
+   "effect": {
+    "type": "shader",
+    "params": {
+     "speed": 1.0,
+     "seam": 0.0,
+     "brightness": 110.0,
+     "saturation": 100.0,
+     "zoom": 1.0,
+     "panX": 0.0,
+     "panY": 0.0
+    },
+    "source": "// A waterfall: white water pours from a cliff edge at the top, streaks rushing down, mist billowing in the pool\n// at the tip; mossy rock on either side. Loops through iPhase: keep \"Loop crossfade\" at 0.\nfloat h(vec2 p) { vec3 q = fract(vec3(p.xyx) * 0.1031); q += dot(q, q.yzx + 33.33); return fract((q.x + q.y) * q.z); }\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec2 uv = fragCoord / iResolution.xy;\n    vec2 p = (fragCoord - 0.5 * iResolution.xy) / iResolution.y;\n    float t = iPhase;\n    float fall = smoothstep(0.32, 0.26, abs(p.x));\n    vec3 rock = mix(vec3(0.08, 0.22, 0.08), vec3(0.18, 0.14, 0.10), h(floor(uv * 12.0)));\n    // Streaks: columns of noise scrolling down three times a loop.\n    float col = floor(uv.x * 30.0);\n    float s = h(vec2(col, floor(uv.y * 14.0 + t * 42.0)));\n    vec3 water = mix(vec3(0.25, 0.55, 0.85), vec3(0.95, 0.98, 1.0), step(0.55, s));\n    // Mist at the bottom.\n    float mist = smoothstep(0.35, 0.0, uv.y) * (0.6 + 0.4 * sin(6.2831853 * (t * 2.0 + uv.x * 3.0)));\n    vec3 c = mix(rock, water, fall);\n    c = mix(c, vec3(0.85, 0.92, 1.0), mist * 0.7);\n    fragColor = vec4(c, 1.0);\n}\n"
+   }
+  }
+ ]
+}

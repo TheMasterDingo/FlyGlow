@@ -1,0 +1,77 @@
+{
+ "format": "flyglow",
+ "version": 1,
+ "preset": {
+  "title": {
+   "en": "Control: the Hiss v2",
+   "ru": "Control: Шипение v2"
+  },
+  "description": {
+   "en": "Control's Hiss as red fluid swirling in the dark.",
+   "ru": "Шипение из Control: красная жидкость клубится в темноте."
+  },
+  "controls": [
+   {
+    "type": "hue",
+    "label": {
+     "en": "Colour",
+     "ru": "Цвет"
+    },
+    "targets": [
+     {
+      "layer": 0
+     }
+    ],
+    "base": "#ff0519"
+   },
+   {
+    "type": "opacity",
+    "label": {
+     "en": "Brightness",
+     "ru": "Яркость"
+    },
+    "targets": [
+     {
+      "layer": 0
+     }
+    ]
+   }
+  ],
+  "group": "Remedy",
+  "cover": 0.1,
+  "tags": [
+   "control",
+   "remedy",
+   "hiss",
+   "jesse faden",
+   "контроль",
+   "ремеди",
+   "шипение"
+  ],
+  "order": 321
+ },
+ "loopSeconds": 12.0,
+ "brightness": 100,
+ "outputGamma": 1.4,
+ "layers": [
+  {
+   "name": "Hiss",
+   "visible": true,
+   "opacity": 1.0,
+   "blend": 0,
+   "effect": {
+    "type": "shader",
+    "params": {
+     "speed": 1.0,
+     "seam": 0.0,
+     "brightness": 110.0,
+     "saturation": 100.0,
+     "zoom": 1.0,
+     "panX": 0.0,
+     "panY": 0.0
+    },
+    "source": "// Control's Hiss as fluid: red ink folding through dark water. Noise warps noise warps noise (domain warping),\n// so the red curls into veins and swirls round black hollows, and bright crimson streaks run along the folds.\n// Now and then thick slime wells up from a point: it pushes the fluid round it outwards, a heavy bright rim rolls\n// out at its edge and a fresh glossy core fills in behind, then settles. Every noise field drifts along a circle\n// through time and every welling starts and ends at rest, so the loop closes. Loops through iPhase: keep \"Loop\n// crossfade\" at 0.\n\nconst float TAU = 6.2831853;\n// The middle of the dock's rounded triangle, about equally far from its three corners.\nconst vec2 MID = vec2(0.0, -1.6);\n\n// Dock layout units: one LED pitch = 1, x to the right, y down, 0 at the centre of the LEDs.\n// The frame spans the dock outline's bounding box: 17.82 x 16.17 units, centred at (-0.018, 0.220).\nvec2 dockPos(vec2 fragCoord)\n{\n    return (fragCoord / iResolution.xy - 0.5) * vec2(17.82, -16.17) + vec2(-0.018, 0.220);\n}\n\n// Centre of the LED nearest to p, so every LED gets one crisp colour; .z = row 0..15 from the top.\nvec3 ledCell(vec2 p)\n{\n    float r0 = floor((p.y + 6.477) / 0.8636 + 0.5);\n    vec3 best = vec3(0.0);\n    float bestD = 1e9;\n    for (int k = -1; k <= 1; k++) {\n        float row = clamp(r0 + float(k), 0.0, 15.0);\n        float n = row <= 2.0 ? 14.0 + row : 18.0 - row;\n        float off = mod(n, 2.0) == 0.0 ? 0.5 : 0.0;\n        float x = clamp(floor(p.x - off + 0.5) + off, -0.5 * (n - 1.0), 0.5 * (n - 1.0));\n        vec2 c = vec2(x, -6.477 + row * 0.8636);\n        float d = dot(p - c, p - c);\n        if (d < bestD) {\n            bestD = d;\n            best = vec3(c, row);\n        }\n    }\n    return best;\n}\n\n// 1 inside a disc around the LED centre, 0 on the cell border: FlyGlow averages each LED's whole cell, and\n// light on the border would leak into the neighbours. Keeps about 2/3 of the light; brightness 120% evens it out.\nfloat ledCore(vec2 p, vec3 led)\n{\n    return step(length(p - led.xy), 0.46);\n}\n\n// Hashes without sine (Dave Hoskins): uncorrelated between neighbouring integers on every GPU.\nfloat hash(vec2 p)\n{\n    vec3 p3 = fract(vec3(p.xyx) * 0.1031);\n    p3 += dot(p3, p3.yzx + 33.33);\n    return fract((p3.x + p3.y) * p3.z);\n}\n\nfloat hash13(vec3 p3)\n{\n    p3 = fract(p3 * 0.1031);\n    p3 += dot(p3, p3.zyx + 31.32);\n    return fract((p3.x + p3.y) * p3.z);\n}\n\nfloat noise3(vec3 p)\n{\n    vec3 i = floor(p);\n    vec3 f = fract(p);\n    f = f * f * (3.0 - 2.0 * f);\n    float a = mix(mix(hash13(i), hash13(i + vec3(1, 0, 0)), f.x),\n                  mix(hash13(i + vec3(0, 1, 0)), hash13(i + vec3(1, 1, 0)), f.x), f.y);\n    float b = mix(mix(hash13(i + vec3(0, 0, 1)), hash13(i + vec3(1, 0, 1)), f.x),\n                  mix(hash13(i + vec3(0, 1, 1)), hash13(i + vec3(1, 1, 1)), f.x), f.y);\n    return mix(a, b, f.z);\n}\n\nfloat fbm3(vec3 p) { return 0.6 * noise3(p) + 0.3 * noise3(p * 2.1 + 5.0) + 0.1 * noise3(p * 4.3 + 9.0); }\n\n// 1 inside, 0 outside a shape given its signed distance in LED pitches, with a half-LED ramp across the edge,\n// so moving edges glide between LEDs without a wide muddy fringe.\nfloat inside(float sd) { return clamp(0.5 - 2.0 * sd, 0.0, 1.0); }\n\nconst int WELLS = 3;\nconst vec2 WELL_AT[3] = vec2[3](vec2(-3.2, -3.4), vec2(3.0, -2.0), vec2(-0.4, 1.8));\n\n// Thick slime welling up at the wells, one after another, a whole cycle each per loop. Returns how far p is pushed\n// out from the well (dock units, already applied to p), with .x the rim's strength and .y the fresh core's.\nvec2 welling(inout vec2 p)\n{\n    vec2 look = vec2(0.0);\n    for (int i = 0; i < WELLS; i++) {\n        float u = fract(iPhase + float(i) / float(WELLS));\n        float grow = 1.0 - pow(1.0 - smoothstep(0.0, 0.55, u), 3.0);   // fast at first, slowing like thick slime\n        float fade = 1.0 - smoothstep(0.45, 1.0, u);\n        float R = 3.2 * grow;\n        vec2 d = p - WELL_AT[i];\n        float r = length(d);\n        if (r < 1e-3 || fade <= 0.0 || R < 0.05)\n            continue;\n        // Inside the bloom the fluid is pushed outwards, most at the middle: sample it from nearer the well.\n        float push = R * fade * smoothstep(R + 1.2, 0.0, r) * 0.8;\n        p -= d / r * push;\n        float rim = exp(-pow((r - R) / 0.7, 2.0)) * fade;\n        float core = 0.75 * smoothstep(R, 0.3 * R, r) * fade * (1.0 - 0.6 * u);\n        look = max(look, vec2(rim, core));\n    }\n    return look;\n}\n\n// 0..1 to colour: black, deep red, crimson, a pale red at the brightest streaks.\nvec3 hiss(float v)\n{\n    vec3 c = mix(vec3(0.0), vec3(0.35, 0.0, 0.02), smoothstep(0.2, 0.45, v));\n    c = mix(c, vec3(1.0, 0.02, 0.1), smoothstep(0.45, 0.8, v));\n    return mix(c, vec3(1.0, 0.35, 0.4), smoothstep(0.88, 1.0, v));\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec2 at = dockPos(fragCoord);\n    vec2 slime = vec2(0.0);   // no welling in v2\n    vec2 p = at * 0.24;\n    float T = TAU * iPhase;\n    vec2 ring = vec2(cos(T), sin(T));\n    vec2 q = vec2(fbm3(vec3(p + 0.5 * ring, 0.0)), fbm3(vec3(p + vec2(5.2, 1.3) - 0.5 * ring, 1.7)));\n    vec2 r = vec2(fbm3(vec3(p + 3.5 * q + vec2(1.7, 9.2), 3.1) + 0.3 * vec3(ring.yx, 0.0)),\n                  fbm3(vec3(p + 3.5 * q + vec2(8.3, 2.8), 4.6) - 0.3 * vec3(ring, 0.0)));\n    float f = fbm3(vec3(p + 3.5 * r, 6.0));\n    // The folds: where the warped field crosses its middle, thin bright veins.\n    float veins = 1.0 - abs(2.0 * fbm3(vec3(p * 1.6 + 2.5 * r, 8.0)) - 1.0);\n    float v = smoothstep(0.3, 0.75, f) * (0.65 + 0.5 * length(q - 0.5));\n    v = max(v, 0.95 * smoothstep(0.82, 0.97, veins) * smoothstep(0.35, 0.6, f));\n    // The slime: a bright heavy rim rolling outwards and a smooth crimson core behind it, glossy where it is fresh.\n    v = max(v, 0.92 * slime.x);\n    v = max(v, mix(v, 0.72 + 0.12 * (f - 0.5), slime.y));\n    fragColor = vec4(hiss(clamp(v, 0.0, 1.0)), 1.0);\n}\n"
+   }
+  }
+ ]
+}

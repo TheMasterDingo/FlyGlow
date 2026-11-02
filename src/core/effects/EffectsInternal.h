@@ -19,6 +19,7 @@ void registerBasicEffects(EffectRegistry& r);
 void registerWaveEffects(EffectRegistry& r);
 void registerNatureEffects(EffectRegistry& r);
 void registerParticleEffects(EffectRegistry& r);
+void registerFilterEffects(EffectRegistry& r);
 
 namespace fxi {
 

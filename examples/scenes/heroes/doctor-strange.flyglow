@@ -1,0 +1,295 @@
+{
+ "format": "flyglow",
+ "version": 1,
+ "preset": {
+  "title": {
+   "en": "Doctor Strange",
+   "ru": "Доктор Стрэндж"
+  },
+  "description": {
+   "en": "Doctor Strange's orange mandala, turning.",
+   "ru": "Оранжевая мандала Доктора Стрэнджа вращается."
+  },
+  "controls": [
+   {
+    "type": "hue",
+    "label": {
+     "en": "Colour",
+     "ru": "Цвет"
+    },
+    "targets": [
+     {
+      "layer": 0
+     },
+     {
+      "layer": 1
+     }
+    ],
+    "base": "#ff6610"
+   },
+   {
+    "type": "toggle",
+    "label": {
+     "en": "Sparks",
+     "ru": "Искры"
+    },
+    "targets": [
+     {
+      "layer": 1
+     }
+    ]
+   },
+   {
+    "type": "number",
+    "label": {
+     "en": "Glow",
+     "ru": "Свечение"
+    },
+    "min": 0,
+    "max": 100,
+    "step": 1,
+    "suffix": "%",
+    "targets": [
+     {
+      "layer": 0,
+      "prop": "glow",
+      "from": 0,
+      "to": 1
+     }
+    ]
+   }
+  ],
+  "group": "Marvel",
+  "cover": 0.1,
+  "tags": [
+   "marvel",
+   "doctor strange",
+   "magic",
+   "mandala",
+   "spell",
+   "avengers"
+  ],
+  "order": 61
+ },
+ "loopSeconds": 8.0,
+ "brightness": 100,
+ "outputGamma": 1.4,
+ "layers": [
+  {
+   "name": "Mandala",
+   "visible": true,
+   "opacity": 1.0,
+   "blend": 0,
+   "effect": {
+    "type": "shader",
+    "params": {
+     "speed": 1.0,
+     "seam": 0.0,
+     "brightness": 125.0,
+     "saturation": 100.0,
+     "zoom": 1.0,
+     "panX": 0.0,
+     "panY": 0.0
+    },
+    "source": "// Doctor Strange's mandala, LED by LED round the LED at row 5: a dashed rune ring and a thin ring turning,\n// two squares that make an eight-pointed star turning against each other (45 degrees each per loop, so they swap\n// places and the loop closes), a thick inner circle, a small eight-pointed star spinning the other way, a pulsing\n// core. Crossings burn brighter. Loops through iPhase: keep \"Loop crossfade\" at 0.\n\n// Dock layout units: one LED pitch = 1, x to the right, y down, 0 at the centre of the LEDs.\n// The frame spans the dock outline's bounding box: 17.82 x 16.17 units, centred at (-0.018, 0.220).\nvec2 dockPos(vec2 fragCoord)\n{\n    return (fragCoord / iResolution.xy - 0.5) * vec2(17.82, -16.17) + vec2(-0.018, 0.220);\n}\n\nconst float TAU = 6.2831853;\n\n// Centre of the LED nearest to p, so every LED gets one crisp colour; .z = row 0..15 from the top.\nvec3 ledCell(vec2 p)\n{\n    float r0 = floor((p.y + 6.477) / 0.8636 + 0.5);\n    vec3 best = vec3(0.0);\n    float bestD = 1e9;\n    for (int k = -1; k <= 1; k++) {\n        float row = clamp(r0 + float(k), 0.0, 15.0);\n        float n = row <= 2.0 ? 14.0 + row : 18.0 - row;\n        float off = mod(n, 2.0) == 0.0 ? 0.5 : 0.0;\n        float x = clamp(floor(p.x - off + 0.5) + off, -0.5 * (n - 1.0), 0.5 * (n - 1.0));\n        vec2 c = vec2(x, -6.477 + row * 0.8636);\n        float d = dot(p - c, p - c);\n        if (d < bestD) {\n            bestD = d;\n            best = vec3(c, row);\n        }\n    }\n    return best;\n}\n\n// 1 inside a disc around the LED centre, 0 on the cell border: FlyGlow averages each LED's whole cell, and\n// light on the border would leak into the neighbours. Keeps about 2/3 of the light; brightness 120% evens it out.\nfloat ledCore(vec2 p, vec3 led)\n{\n    return step(length(p - led.xy), 0.46);\n}\n\nconst vec2 C = vec2(0.0, -2.159);\n\nvec2 rot(vec2 p, float a) { return vec2(cos(a) * p.x - sin(a) * p.y, sin(a) * p.x + cos(a) * p.y); }\n\n// Distance to the outline of a square with half-size s turned by a.\nfloat square(vec2 p, float s, float a)\n{\n    vec2 q = abs(rot(p, a));\n    return abs(max(q.x, q.y) - s);\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec2 q = dockPos(fragCoord);\n    vec3 led = ledCell(q);\n    vec2 p = led.xy - C;\n    float r = length(p);\n    float a = atan(p.y, p.x);\n    float t = iPhase;\n    float v = 0.0;\n\n    // Rune ring: twelve dashes creeping round twice a loop.\n    if (r > 4.45 && r < 5.15)\n        v += 0.75 * step(0.35, fract(12.0 * a / TAU - t * 2.0));\n    // The big star: two squares turning against each other.\n    float sq = TAU / 8.0 * t;\n    if (square(p, 3.0, sq) < 0.42) v += 0.85;\n    if (square(p, 3.0, TAU / 8.0 - sq) < 0.42) v += 0.85;\n    // Small star spinning the other way, a quarter turn per loop, round a pulsing core.\n    float sm = -TAU / 4.0 * t;\n    if (r > 0.1 && r < 1.6 && (square(p, 1.05, sm) < 0.4 || square(p, 1.05, sm + TAU / 8.0) < 0.4)) v += 0.55;\n    if (r < 0.1) v += 0.7 + 0.3 * cos(TAU * 2.0 * t);\n\n    float pulse = 0.88 + 0.12 * cos(TAU * 2.0 * t);\n    vec3 col = vec3(1.0, 0.40, 0.04) * min(v, 1.0) * pulse + vec3(0.0, 0.42, 0.55) * clamp(v - 1.0, 0.0, 1.0);\n    fragColor = vec4(col * ledCore(q, led), 1.0);\n}\n"
+   },
+   "glow": 0.2,
+   "glowSize": 1.0
+  },
+  {
+   "name": "Sparks",
+   "visible": true,
+   "opacity": 1.0,
+   "blend": 2,
+   "effect": {
+    "type": "sparkle",
+    "params": {
+     "gradient": [
+      {
+       "pos": 0.0,
+       "color": "#fff0c0"
+      },
+      {
+       "pos": 0.5,
+       "color": "#ffa020"
+      },
+      {
+       "pos": 1.0,
+       "color": "#c03000"
+      }
+     ],
+     "density": 25.0,
+     "size": 0.5,
+     "cycles": 3,
+     "seed": 14,
+     "transparent": true,
+     "background": "#000000"
+    }
+   },
+   "mask": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    0.886,
+    0.311,
+    0.058,
+    0.058,
+    0.311,
+    0.886,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    0.317,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.317,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    0.064,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.064,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    0.066,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.066,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    0.326,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.326,
+    1.0,
+    1.0,
+    1.0,
+    0.896,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.896,
+    1.0,
+    1.0,
+    0.326,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.326,
+    1.0,
+    1.0,
+    0.066,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.066,
+    1.0,
+    1.0,
+    0.064,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.064,
+    1.0,
+    1.0,
+    0.317,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.317,
+    1.0,
+    1.0,
+    0.886,
+    0.311,
+    0.058,
+    0.058,
+    0.311,
+    0.886,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    0.999,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  }
+ ]
+}

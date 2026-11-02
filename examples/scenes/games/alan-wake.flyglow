@@ -1,0 +1,84 @@
+{
+ "format": "flyglow",
+ "version": 1,
+ "preset": {
+  "title": {
+   "en": "Alan Wake",
+   "ru": "Алан Уэйк"
+  },
+  "description": {
+   "en": "A flashlight beam burning off the darkness in a forest.",
+   "ru": "Луч фонарика выжигает тьму в лесу."
+  },
+  "controls": [
+   {
+    "type": "hue",
+    "label": {
+     "en": "Light",
+     "ru": "Свет"
+    },
+    "targets": [
+     {
+      "layer": 0
+     }
+    ],
+    "base": "#fff2cc"
+   },
+   {
+    "type": "number",
+    "label": {
+     "en": "Glow",
+     "ru": "Свечение"
+    },
+    "min": 0,
+    "max": 100,
+    "step": 1,
+    "suffix": "%",
+    "targets": [
+     {
+      "layer": 0,
+      "prop": "glow",
+      "from": 0,
+      "to": 1
+     }
+    ]
+   }
+  ],
+  "group": "Remedy",
+  "cover": 0.25,
+  "tags": [
+   "alan wake",
+   "remedy",
+   "flashlight",
+   "darkness",
+   "алан уэйк",
+   "ремеди",
+   "фонарик"
+  ],
+  "order": 321
+ },
+ "loopSeconds": 6.0,
+ "brightness": 100,
+ "outputGamma": 1.4,
+ "layers": [
+  {
+   "name": "Flashlight",
+   "visible": true,
+   "opacity": 1.0,
+   "blend": 0,
+   "effect": {
+    "type": "shader",
+    "params": {
+     "speed": 1.0,
+     "seam": 0.0,
+     "brightness": 110.0,
+     "saturation": 100.0,
+     "zoom": 1.0,
+     "panX": 0.0,
+     "panY": 0.0
+    },
+    "source": "// Alan Wake: a flashlight beam sweeps through a dark forest from the tip of the dock; where it falls, the\n// Taken's darkness burns off in sparks. Loops through iPhase: keep \"Loop crossfade\" at 0.\nconst float PI2 = 6.2831853;\nfloat h(vec2 p) { vec3 q = fract(vec3(p.xyx) * 0.1031); q += dot(q, q.yzx + 33.33); return fract((q.x + q.y) * q.z); }\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec2 p = (fragCoord - vec2(0.5 * iResolution.x, 0.0)) / iResolution.y;   // origin at the bottom middle\n    float t = iPhase;\n    // Trees: dark trunks across the top half.\n    float trunk = step(0.82, fract(p.x * 5.0 + 0.3 * sin(p.x * 13.0))) * step(0.35, p.y);\n    vec3 col = mix(vec3(0.02, 0.07, 0.20), vec3(0.0), trunk);\n    // The beam: a cone from the tip swinging left and right.\n    float ang = 0.55 * sin(PI2 * t);\n    float a = atan(p.x, p.y) - ang;\n    float beam = smoothstep(0.17, 0.08, abs(a)) * smoothstep(1.2, 0.2, length(p));\n    col += vec3(1.0, 0.95, 0.8) * beam * (0.85 - 0.6 * trunk);\n    // Sparks where the light burns the darkness off.\n    float s = h(floor(p * 22.0) + floor(t * 12.0));\n    col += vec3(1.0, 0.9, 0.6) * step(0.93, s) * beam;\n    fragColor = vec4(col, 1.0);\n}\n"
+   }
+  }
+ ]
+}

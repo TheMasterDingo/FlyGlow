@@ -2,6 +2,7 @@
 
 #include "core/Effect.h"
 #include "core/LedLayout.h"
+#include "core/Scene.h"
 
 #include <QPainter>
 #include <QPainterPath>
@@ -40,14 +41,23 @@ QPixmap renderThumbnail(const std::vector<Rgb>& linear, const QSize& size, qreal
     return pm;
 }
 
-QPixmap renderEffectThumbnail(const Effect& effect, double phase, const QSize& size, qreal dpr)
+QPixmap renderEffectThumbnail(const Effect& effect, double phase, const QSize& size, qreal dpr, const Layer* look)
 {
     const LedLayout& L = LedLayout::cd2();
     Frame frame(size_t(L.count()));
     RenderContext ctx;
-    ctx.phase = phase;
+    ctx.phase = effect.showcasePhase(phase);
     ctx.layout = &L;
+    // A filter has no picture of its own, so it shows what it does to a rainbow.
+    std::vector<Rgb> sample;
+    if (effect.isFilter()) {
+        for (const Led& led : L.leds())
+            sample.push_back(color::rainbow(float(led.uv.x() * 0.8 + led.uv.y() * 0.2)));
+        ctx.below = &sample;
+    }
     effect.render(ctx, frame);
+    if (look)
+        applyLayerLook(*look, frame, L);
     std::vector<Rgb> out(frame.size());
     for (size_t i = 0; i < frame.size(); ++i) {
         // Overlays are shown over black.

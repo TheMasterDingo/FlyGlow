@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.21)
-project(FlyGlow VERSION 0.2.1 LANGUAGES CXX)
+project(FlyGlow VERSION 0.3.0 LANGUAGES CXX)
+if(NOT PROJECT_VERSION_TWEAK)
+    set(PROJECT_VERSION_TWEAK 0)
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -28,7 +31,7 @@ qt_add_executable(FlyGlow WIN32 src/main.cpp ${FG_UI_SOURCES} ${FG_DEVICE_SOURCE
     ${FG_SHADER_SOURCES})
 target_link_libraries(FlyGlow PRIVATE flyglow_core Qt6::Widgets Qt6::Network Qt6::Concurrent)
 target_compile_definitions(FlyGlow PRIVATE FLYGLOW_VERSION="${PROJECT_VERSION}"
-    FLYGLOW_VERSION_RC=${PROJECT_VERSION_MAJOR},${PROJECT_VERSION_MINOR},${PROJECT_VERSION_PATCH},0)
+    FLYGLOW_VERSION_RC=${PROJECT_VERSION_MAJOR},${PROJECT_VERSION_MINOR},${PROJECT_VERSION_PATCH},${PROJECT_VERSION_TWEAK})
 if(EXISTS ${CMAKE_SOURCE_DIR}/resources/resources.qrc)
     target_sources(FlyGlow PRIVATE resources/resources.qrc)
 endif()
@@ -37,6 +40,15 @@ if(WIN32)
     if(EXISTS ${CMAKE_SOURCE_DIR}/resources/app.rc)
         target_sources(FlyGlow PRIVATE resources/app.rc)
     endif()
+endif()
+
+# Every scene under examples/scenes/<category>/ is a built-in preset (docs/presets.md); folders starting with "_"
+# are scratch space and stay out.
+file(GLOB_RECURSE FG_PRESET_FILES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/examples/scenes/*.flyglow)
+list(FILTER FG_PRESET_FILES EXCLUDE REGEX "/examples/scenes/_")
+if(FG_PRESET_FILES)
+    qt_add_resources(FlyGlow flyglow_presets PREFIX /presets BASE ${CMAKE_SOURCE_DIR}/examples/scenes
+                     FILES ${FG_PRESET_FILES})
 endif()
 
 set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT FlyGlow)
@@ -67,6 +79,11 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/tools/shader_check.cpp)
     qt_add_executable(shader_check tools/shader_check.cpp ${FG_SHADER_SOURCES}
         src/media/LedSampler.cpp src/media/LedSampler.h)
     target_link_libraries(shader_check PRIVATE flyglow_core Qt6::Concurrent)
+endif()
+if(EXISTS ${CMAKE_SOURCE_DIR}/tools/scene_check.cpp)
+    qt_add_executable(scene_check tools/scene_check.cpp ${FG_SHADER_SOURCES}
+        src/media/LedSampler.cpp src/media/LedSampler.h)
+    target_link_libraries(scene_check PRIVATE flyglow_core Qt6::Concurrent)
 endif()
 if(EXISTS ${CMAKE_SOURCE_DIR}/tools/ipc_probe.cpp)
     qt_add_executable(ipc_probe tools/ipc_probe.cpp ${FG_DEVICE_SOURCES})

@@ -1,5 +1,5 @@
 ﻿#ifndef AppVersion
-  #define AppVersion "0.2.1"
+  #define AppVersion "0.3.0"
 #endif
 #ifndef StageDir
   #define StageDir "..\dist\" + AppVersion + "\FlyGlow"
@@ -62,6 +62,23 @@ ru.SceneFileType=Сцена FlyGlow
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 Name: "assoc"; Description: "{cm:AssocFileExtension,{#AppName},.flyglow}"; GroupDescription: "{cm:FileAssocGroup}"
+
+[InstallDelete]
+; Installing over any earlier version starts from a clean program folder: the old exe, Qt and runtime DLLs and plugin
+; folders go first, so nothing a newer build no longer ships is left behind. The uninstaller and user data (AppData,
+; or data\ next to a portable copy) are not touched.
+Type: files; Name: "{app}\{#AppExe}"
+Type: files; Name: "{app}\*.dll"
+Type: files; Name: "{app}\portable.txt"
+Type: filesandordirs; Name: "{app}\generic"
+Type: filesandordirs; Name: "{app}\iconengines"
+Type: filesandordirs; Name: "{app}\imageformats"
+Type: filesandordirs; Name: "{app}\multimedia"
+Type: filesandordirs; Name: "{app}\networkinformation"
+Type: filesandordirs; Name: "{app}\platforms"
+Type: filesandordirs; Name: "{app}\styles"
+Type: filesandordirs; Name: "{app}\tls"
+Type: filesandordirs; Name: "{app}\translations"
 
 [Files]
 Source: "{#StageDir}\*"; DestDir: "{app}"; Excludes: "portable.txt,\data"; Flags: ignoreversion recursesubdirs createallsubdirs

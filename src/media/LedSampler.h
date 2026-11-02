@@ -46,7 +46,11 @@ QTransform layoutToView(const LedLayout& layout, const QSize& source, const Fram
 
 class LedSampler {
 public:
-    explicit LedSampler(const LedLayout& layout);
+    /**
+     * @param reach Size of each LED's sampling patch against its hex cell: 1 reaches the cell's edges, smaller
+     *              stays clear of them, so a picture painted as flat cells comes back exactly.
+     */
+    explicit LedSampler(const LedLayout& layout, double reach = 1.0);
 
     /** Averages each LED's hex cell in linear light; `out` gets one colour per LED. Thread-safe. */
     void sample(const QImage& frame, const Framing& framing, const Adjustments& adjust,
@@ -58,6 +62,7 @@ public:
 private:
     const LedLayout& m_layout;
     std::vector<QPointF> m_pattern;
+    double m_step = 0;
 };
 
 } // namespace fg::media

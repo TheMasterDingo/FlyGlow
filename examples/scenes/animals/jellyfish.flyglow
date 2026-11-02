@@ -1,0 +1,106 @@
+{
+ "format": "flyglow",
+ "version": 1,
+ "preset": {
+  "title": {
+   "en": "Jellyfish",
+   "ru": "Медуза"
+  },
+  "description": {
+   "en": "A pink jellyfish swimming in deep water.",
+   "ru": "Розовая медуза плывёт в глубине."
+  },
+  "controls": [
+   {
+    "type": "hue",
+    "label": {
+     "en": "Colour",
+     "ru": "Цвет"
+    },
+    "targets": [
+     {
+      "layer": 1
+     }
+    ],
+    "base": "#ff1f8c"
+   },
+   {
+    "type": "hue",
+    "label": {
+     "en": "Water",
+     "ru": "Вода"
+    },
+    "targets": [
+     {
+      "layer": 0
+     }
+    ],
+    "base": "#0a2a80"
+   },
+   {
+    "type": "toggle",
+    "label": {
+     "en": "Water",
+     "ru": "Вода"
+    },
+    "targets": [
+     {
+      "layer": 0
+     }
+    ]
+   }
+  ],
+  "cover": 0.1,
+  "tags": [
+   "jellyfish",
+   "sea",
+   "ocean",
+   "медуза",
+   "море"
+  ],
+  "order": 101
+ },
+ "loopSeconds": 6.0,
+ "brightness": 100,
+ "outputGamma": 1.4,
+ "layers": [
+  {
+   "name": "Deep water",
+   "visible": true,
+   "opacity": 1.0,
+   "blend": 0,
+   "effect": {
+    "type": "shader",
+    "params": {
+     "speed": 1.0,
+     "seam": 0.0,
+     "brightness": 120.0,
+     "saturation": 100.0,
+     "zoom": 1.0,
+     "panX": 0.0,
+     "panY": 0.0
+    },
+    "source": "// Deep water for the jellyfish: dark blue, lighter near the top, marine snow drifting slowly up.\n// Loops through iPhase: keep \"Loop crossfade\" at 0.\n\n// Dock layout units: one LED pitch = 1, x to the right, y down, 0 at the centre of the LEDs.\n// The frame spans the dock outline's bounding box: 17.82 x 16.17 units, centred at (-0.018, 0.220).\nvec2 dockPos(vec2 fragCoord)\n{\n    return (fragCoord / iResolution.xy - 0.5) * vec2(17.82, -16.17) + vec2(-0.018, 0.220);\n}\n\n// Centre of the LED nearest to p, so every LED gets one crisp colour; .z = row 0..15 from the top.\nvec3 ledCell(vec2 p)\n{\n    float r0 = floor((p.y + 6.477) / 0.8636 + 0.5);\n    vec3 best = vec3(0.0);\n    float bestD = 1e9;\n    for (int k = -1; k <= 1; k++) {\n        float row = clamp(r0 + float(k), 0.0, 15.0);\n        float n = row <= 2.0 ? 14.0 + row : 18.0 - row;\n        float off = mod(n, 2.0) == 0.0 ? 0.5 : 0.0;\n        float x = clamp(floor(p.x - off + 0.5) + off, -0.5 * (n - 1.0), 0.5 * (n - 1.0));\n        vec2 c = vec2(x, -6.477 + row * 0.8636);\n        float d = dot(p - c, p - c);\n        if (d < bestD) {\n            bestD = d;\n            best = vec3(c, row);\n        }\n    }\n    return best;\n}\n\n// 1 inside a disc around the LED centre, 0 on the cell border: FlyGlow averages each LED's whole cell, and\n// light on the border would leak into the neighbours. Keeps about 2/3 of the light; brightness 120% evens it out.\nfloat ledCore(vec2 p, vec3 led)\n{\n    return step(length(p - led.xy), 0.46);\n}\n\n// Hash without sine (Dave Hoskins): uncorrelated between neighbouring integers on every GPU.\nfloat hash(vec2 p)\n{\n    vec3 p3 = fract(vec3(p.xyx) * 0.1031);\n    p3 += dot(p3, p3.yzx + 33.33);\n    return fract((p3.x + p3.y) * p3.z);\n}\n\nfloat vnoise(vec2 p)\n{\n    vec2 i = floor(p);\n    vec2 f = fract(p);\n    f = f * f * (3.0 - 2.0 * f);\n    return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),\n               mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);\n}\n\n// 1 inside, 0 outside, with a half-LED ramp across the edge so moving shapes glide between LEDs.\nfloat inside(float sd) { return clamp(0.5 - 2.0 * sd, 0.0, 1.0); }\n\nconst float TAU = 6.2831853;\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec2 q = dockPos(fragCoord);\n    vec3 led = ledCell(q);\n    vec2 p = led.xy;\n    float depth = clamp((p.y + 0.18 * p.x + 6.5) / 13.0, 0.0, 1.0);\n    vec3 col = mix(vec3(0.0, 0.13, 0.45), vec3(0.0, 0.035, 0.17), depth);\n    // Specks rising once a loop each, wobbling a little.\n    for (int k = 0; k < 7; k++) {\n        float fk = float(k);\n        float y = mix(8.0, -8.0, fract(iPhase + hash(vec2(fk, 1.0))));\n        float x = -6.0 + 12.0 * (fk + 0.5) / 7.0 + 0.6 * sin(TAU * (iPhase * 2.0 + hash(vec2(fk, 2.0))));\n        float d = length(p - vec2(x, y));\n        col += vec3(0.25, 0.45, 0.55) * clamp(1.2 - 2.0 * d, 0.0, 1.0);\n    }\n    fragColor = vec4(col * ledCore(q, led), 1.0);\n}\n"
+   }
+  },
+  {
+   "name": "Jellyfish",
+   "visible": true,
+   "opacity": 1.0,
+   "blend": 2,
+   "effect": {
+    "type": "shader",
+    "params": {
+     "speed": 1.0,
+     "seam": 0.0,
+     "brightness": 120.0,
+     "saturation": 100.0,
+     "zoom": 1.0,
+     "panX": 0.0,
+     "panY": 0.0
+    },
+    "source": "// Jellyfish: a glowing bell squeezes twice a loop, rising with each beat and sinking back;\n// its tentacles wave below it down into the tip. Black outside, so the layer sits on the water in Screen mode.\n// Loops through iPhase: keep \"Loop crossfade\" at 0.\n\n// Dock layout units: one LED pitch = 1, x to the right, y down, 0 at the centre of the LEDs.\n// The frame spans the dock outline's bounding box: 17.82 x 16.17 units, centred at (-0.018, 0.220).\nvec2 dockPos(vec2 fragCoord)\n{\n    return (fragCoord / iResolution.xy - 0.5) * vec2(17.82, -16.17) + vec2(-0.018, 0.220);\n}\n\n// Centre of the LED nearest to p, so every LED gets one crisp colour; .z = row 0..15 from the top.\nvec3 ledCell(vec2 p)\n{\n    float r0 = floor((p.y + 6.477) / 0.8636 + 0.5);\n    vec3 best = vec3(0.0);\n    float bestD = 1e9;\n    for (int k = -1; k <= 1; k++) {\n        float row = clamp(r0 + float(k), 0.0, 15.0);\n        float n = row <= 2.0 ? 14.0 + row : 18.0 - row;\n        float off = mod(n, 2.0) == 0.0 ? 0.5 : 0.0;\n        float x = clamp(floor(p.x - off + 0.5) + off, -0.5 * (n - 1.0), 0.5 * (n - 1.0));\n        vec2 c = vec2(x, -6.477 + row * 0.8636);\n        float d = dot(p - c, p - c);\n        if (d < bestD) {\n            bestD = d;\n            best = vec3(c, row);\n        }\n    }\n    return best;\n}\n\n// 1 inside a disc around the LED centre, 0 on the cell border: FlyGlow averages each LED's whole cell, and\n// light on the border would leak into the neighbours. Keeps about 2/3 of the light; brightness 120% evens it out.\nfloat ledCore(vec2 p, vec3 led)\n{\n    return step(length(p - led.xy), 0.46);\n}\n\n// Hash without sine (Dave Hoskins): uncorrelated between neighbouring integers on every GPU.\nfloat hash(vec2 p)\n{\n    vec3 p3 = fract(vec3(p.xyx) * 0.1031);\n    p3 += dot(p3, p3.yzx + 33.33);\n    return fract((p3.x + p3.y) * p3.z);\n}\n\nfloat vnoise(vec2 p)\n{\n    vec2 i = floor(p);\n    vec2 f = fract(p);\n    f = f * f * (3.0 - 2.0 * f);\n    return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),\n               mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);\n}\n\n// 1 inside, 0 outside, with a half-LED ramp across the edge so moving shapes glide between LEDs.\nfloat inside(float sd) { return clamp(0.5 - 2.0 * sd, 0.0, 1.0); }\n\nconst float TAU = 6.2831853;\n\n// Bell squeeze over one beat: quick contraction, slow release.\nfloat squeeze(float u) { return smoothstep(0.0, 0.16, u) * (1.0 - smoothstep(0.2, 0.85, u)); }\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec2 q = dockPos(fragCoord);\n    vec3 led = ledCell(q);\n    vec2 p = led.xy;\n    float beat = fract(iPhase * 2.0);\n    float s = squeeze(beat);\n    float lift = smoothstep(0.0, 0.4, beat) - smoothstep(0.4, 1.0, beat);\n    vec2 c = vec2(1.0 * sin(TAU * iPhase), -3.0 - 0.8 * lift);\n\n    vec3 col = vec3(0.0);\n    float rx = 4.4 - 1.0 * s;\n    float ryTop = 3.1 + 0.6 * s;\n    float sway = -0.6 * cos(TAU * iPhase);              // the tips trail behind the sideways drift\n    // Two thin tentacles from under the rim, one LED wide, pale violet, fading towards their tips.\n    for (int k = 0; k < 2; k++) {\n        float fk = float(k);\n        float bx = c.x + (fk < 0.5 ? -1.0 : 1.0) * (rx - 1.2);\n        float h = p.y - (c.y + 0.6);\n        float len = 8.0 + 1.0 * fk;\n        if (h > 0.0 && h < len) {\n            float wave = 0.7 * sin(0.8 * h - TAU * 2.0 * iPhase + fk * 1.9) * smoothstep(0.0, 3.0, h);\n            float x = mix(bx, c.x + (bx - c.x) * 0.35, h / len) + wave + sway * h / len;\n            float a = smoothstep(0.62, 0.38, abs(p.x - x)) * (1.0 - smoothstep(0.3, 1.0, h / len));\n            col = max(col, vec3(0.55, 0.5, 1.0) * a);\n        }\n    }\n    // One frilly oral arm down the middle, pink and wider, curling.\n    {\n        float h = p.y - (c.y + 0.4);\n        float len = 6.0;\n        if (h > 0.0 && h < len) {\n            float x = c.x + 0.6 * sin(0.9 * h - TAU * 2.0 * iPhase + 1.0) + sway * h / len;\n            float w = 0.55 + 0.3 * sin(2.2 * h - TAU * 4.0 * iPhase);\n            float a = inside(abs(p.x - x) - w) * (1.0 - smoothstep(0.5, 1.0, h / len));\n            col = max(col, vec3(1.0, 0.3, 0.7) * a);\n        }\n    }\n    // The bell: a pink dome, paler on top, with a bright frilled hem that flares as it squeezes.\n    vec2 d = p - c;\n    float e = length(vec2(d.x / rx, d.y / (d.y < 0.0 ? ryTop : 1.0)));\n    float a = inside((e - 1.0) * 1.5);\n    if (a > 0.0) {\n        vec3 bell = mix(vec3(1.0, 0.62, 0.9), vec3(1.0, 0.12, 0.55), smoothstep(-ryTop, 0.3, d.y));\n        float hem = smoothstep(-0.2, 0.5, d.y) * (0.5 + 0.5 * cos(TAU * d.x / 1.6 + TAU * iPhase * 2.0));\n        bell = mix(bell, vec3(1.0, 0.85, 1.0), hem * (0.4 + 0.6 * s));\n        col = mix(col, bell, a);\n    }\n    fragColor = vec4(col * ledCore(q, led), 1.0);\n}\n"
+   }
+  }
+ ]
+}

@@ -1,0 +1,65 @@
+{
+ "format": "flyglow",
+ "version": 1,
+ "preset": {
+  "title": {
+   "en": "Eye of Sauron",
+   "ru": "Око Саурона"
+  },
+  "description": {
+   "en": "The Eye of Sauron in flames, looking around.",
+   "ru": "Око Саурона в пламени оглядывается."
+  },
+  "controls": [
+   {
+    "type": "hue",
+    "label": {
+     "en": "Colour",
+     "ru": "Цвет"
+    },
+    "targets": [
+     {
+      "layer": 0
+     }
+    ],
+    "base": "#ff4700"
+   }
+  ],
+  "cover": 0.25,
+  "tags": [
+   "lord of the rings",
+   "sauron",
+   "eye",
+   "fire",
+   "villain",
+   "властелин колец",
+   "саурон",
+   "око"
+  ],
+  "order": 300
+ },
+ "loopSeconds": 10.0,
+ "brightness": 100,
+ "outputGamma": 1.4,
+ "layers": [
+  {
+   "name": "Eye",
+   "visible": true,
+   "opacity": 1.0,
+   "blend": 0,
+   "effect": {
+    "type": "shader",
+    "params": {
+     "speed": 1.0,
+     "seam": 0.0,
+     "brightness": 120.0,
+     "saturation": 100.0,
+     "zoom": 1.0,
+     "panX": 0.0,
+     "panY": 0.0
+    },
+    "source": "// Eye of Sauron: the dragon's eye turned into the lidless eye wreathed in flame. A lens of fire, yellow at the\n// heart and red at the rim, with a black slit pupil that slowly searches left and right and narrows; flames lick\n// round it on the black, taller above than below. The flame noise is read along a circle through time, so the\n// loop closes. Loops through iPhase: keep \"Loop crossfade\" at 0.\n\n// Dock layout units: one LED pitch = 1, x to the right, y down, 0 at the centre of the LEDs.\n// The frame spans the dock outline's bounding box: 17.82 x 16.17 units, centred at (-0.018, 0.220).\nvec2 dockPos(vec2 fragCoord)\n{\n    return (fragCoord / iResolution.xy - 0.5) * vec2(17.82, -16.17) + vec2(-0.018, 0.220);\n}\n\n// Centre of the LED nearest to p, so every LED gets one crisp colour; .z = row 0..15 from the top.\nvec3 ledCell(vec2 p)\n{\n    float r0 = floor((p.y + 6.477) / 0.8636 + 0.5);\n    vec3 best = vec3(0.0);\n    float bestD = 1e9;\n    for (int k = -1; k <= 1; k++) {\n        float row = clamp(r0 + float(k), 0.0, 15.0);\n        float n = row <= 2.0 ? 14.0 + row : 18.0 - row;\n        float off = mod(n, 2.0) == 0.0 ? 0.5 : 0.0;\n        float x = clamp(floor(p.x - off + 0.5) + off, -0.5 * (n - 1.0), 0.5 * (n - 1.0));\n        vec2 c = vec2(x, -6.477 + row * 0.8636);\n        float d = dot(p - c, p - c);\n        if (d < bestD) {\n            bestD = d;\n            best = vec3(c, row);\n        }\n    }\n    return best;\n}\n\n// 1 inside a disc around the LED centre, 0 on the cell border: FlyGlow averages each LED's whole cell, and\n// light on the border would leak into the neighbours. Keeps about 2/3 of the light; brightness 120% evens it out.\nfloat ledCore(vec2 p, vec3 led)\n{\n    return step(length(p - led.xy), 0.46);\n}\n\n// Hash without sine (Dave Hoskins): uncorrelated between neighbouring integers on every GPU.\nfloat hash(vec2 p)\n{\n    vec3 p3 = fract(vec3(p.xyx) * 0.1031);\n    p3 += dot(p3, p3.yzx + 33.33);\n    return fract((p3.x + p3.y) * p3.z);\n}\n\nfloat vnoise(vec2 p)\n{\n    vec2 i = floor(p);\n    vec2 f = fract(p);\n    f = f * f * (3.0 - 2.0 * f);\n    return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),\n               mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);\n}\n\n// 1 inside, 0 outside, with a half-LED ramp across the edge so moving shapes glide between LEDs.\nfloat inside(float sd) { return clamp(0.5 - 2.0 * sd, 0.0, 1.0); }\n\nconst float TAU = 6.2831853;\n\nconst vec2 EC = vec2(0.0, -2.0);    // centre of the eye\nconst float W = 6.6;                // half its length\nconst float H = 2.5;                // half its height in the middle\n\n// Heat 0..1: black, deep red, orange, gold.\nvec3 fire(float v)\n{\n    v = clamp(v, 0.0, 1.0);\n    vec3 c = mix(vec3(0.0), vec3(0.7, 0.0, 0.0), smoothstep(0.05, 0.3, v));\n    c = mix(c, vec3(1.0, 0.28, 0.0), smoothstep(0.3, 0.65, v));\n    return mix(c, vec3(1.0, 0.8, 0.2), smoothstep(0.65, 1.0, v));\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec2 q = dockPos(fragCoord);\n    vec3 led = ledCell(q);\n    vec2 p = led.xy;\n    float t = iPhase;\n    float T = TAU * t;\n\n    float look = 1.3 * sin(T);                                   // searching, once a loop\n    float pw = 0.55 + 0.35 * (0.5 + 0.5 * sin(2.0 * T));         // the slit narrows and widens twice\n\n    float f = clamp(1.0 - (p.x / W) * (p.x / W), 0.0, 1.0);\n    float half_h = H * pow(f, 0.7);\n    float d = abs(p.y - EC.y) - half_h;                          // < 0 inside the lens\n    vec2 ring = vec2(cos(T), sin(T));\n    vec3 col;\n    if (d > 0.0) {\n        // Flames: a dark gap round the lens, then tongues of red fire broken by noise, reaching further upward.\n        float reach = p.y < EC.y ? 1.8 : 0.9;\n        float n = vnoise(vec2(0.9 * p.x, 0.7 * p.y) + 1.8 * ring) * 0.65\n                + vnoise(vec2(1.9 * p.x, 1.5 * p.y) - 1.2 * ring) * 0.35;\n        float tongues = smoothstep(0.45, 0.8, n);\n        col = fire(0.62 * exp(-(d - 0.5) / reach) * tongues) * smoothstep(0.35, 0.8, d);\n    } else {\n        vec2 ic = EC + vec2(look, 0.0);\n        vec2 e = (p - ic) / vec2(W * 0.75, H);\n        float streak = vnoise(vec2(5.0 * atan(e.y, e.x), length(e) * 2.0) + 1.5 * ring);\n        col = fire(1.15 - 0.45 * length(e) + 0.15 * streak);\n        col = mix(vec3(0.85, 0.06, 0.0), col, smoothstep(-0.2, -0.7, d));   // a red rim inside the lens\n        float sy = (p.y - ic.y) / (H + 0.3);\n        float slit = abs(p.x - ic.x) - pw * sqrt(max(1.0 - sy * sy, 0.0));\n        col = mix(col, vec3(0.0), inside(slit));\n    }\n    fragColor = vec4(col * ledCore(q, led), 1.0);\n}\n"
+   }
+  }
+ ]
+}

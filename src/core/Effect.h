@@ -52,6 +52,11 @@ struct RenderContext {
     double loopSeconds = 4;
     /** nullptr renders for LedLayout::cd2(). */
     const LedLayout* layout = nullptr;
+    /**
+     * For a filter (Effect::isFilter()): the layers below composited so far, one linear colour per LED.
+     * nullptr reads as black.
+     */
+    const std::vector<Rgb>* below = nullptr;
 };
 
 /**
@@ -77,6 +82,17 @@ public:
     virtual bool isAnimated() const { return true; }
 
     virtual bool listedInLibrary() const { return true; }
+
+    /**
+     * True for an effect that reworks the picture below it (RenderContext::below) instead of drawing its own. The
+     * layer's opacity, blend mode and area then say how much of the result goes over the original.
+     */
+    virtual bool isFilter() const { return false; }
+    /**
+     * A phase near phase that shows what the effect does, for thumbnails; effects that act only now and then (a
+     * glitch between bursts looks like its input) pick a moment when they act.
+     */
+    virtual double showcasePhase(double phase) const { return phase; }
 
     /**
      * Deep copy. The default copies only parameter values, so effects with extra state override it.

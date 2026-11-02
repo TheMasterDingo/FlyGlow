@@ -72,6 +72,12 @@ void ParamPanel::rebuild()
         label->setObjectName("Dim");
         label->setContentsMargins(0, 8, 0, 0);
         m_layout->addWidget(label);
+        if (pd.type == ParamDesc::Type::Float || pd.type == ParamDesc::Type::Int || pd.type == ParamDesc::Type::Angle
+            || pd.type == ParamDesc::Type::Color) {
+            label->setContextMenuPolicy(Qt::CustomContextMenu);
+            connect(label, &QWidget::customContextMenuRequested, this,
+                    [this, label, id](const QPoint& p) { emit paramContextMenu(id, label->mapToGlobal(p)); });
+        }
 
         switch (pd.type) {
         case ParamDesc::Type::Float:

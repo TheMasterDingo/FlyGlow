@@ -15,6 +15,7 @@ void registerBuiltinEffects()
     registerWaveEffects(r);
     registerNatureEffects(r);
     registerParticleEffects(r);
+    registerFilterEffects(r);
 }
 
 } // namespace fg

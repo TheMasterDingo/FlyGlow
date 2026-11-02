@@ -1,11 +1,15 @@
 #include "MainWindow.h"
 
+#include "AppPaths.h"
 #include "Controls.h"
+#include "OnlineUpdates.h"
 #include "EffectLibrary.h"
 #include "Icons.h"
 #include "Inspector.h"
 #include "Language.h"
 #include "MediaImportDialog.h"
+#include "PresetBrowser.h"
+#include "PresetLibrary.h"
 #include "Project.h"
 #include "ShaderEditor.h"
 #include "Theme.h"
@@ -17,15 +21,20 @@
 #include "device/SpaceStationClient.h"
 
 #include <QApplication>
+#include <QCheckBox>
 #include <QCloseEvent>
 #include <QComboBox>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QDialog>
+#include <QDesktopServices>
 #include <QDialogButtonBox>
 #include <QDir>
 #include <QDoubleSpinBox>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QHBoxLayout>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QKeyEvent>
 #include <QLineEdit>
@@ -33,15 +42,21 @@
 #include <QLocale>
 #include <QMenu>
 #include <QMessageBox>
+#include <QMimeData>
 #include <QGraphicsOpacityEffect>
+#include <QPlainTextEdit>
 #include <QPushButton>
+#include <QRegularExpression>
 #include <QSaveFile>
 #include <QSettings>
 #include <QShortcut>
+#include <QSignalBlocker>
 #include <QSplitter>
 #include <QStandardPaths>
 #include <QStatusBar>
+#include <QTabBar>
 #include <QToolButton>
+#include <QUrl>
 #include <QVBoxLayout>
 #include <algorithm>
 #include <cmath>
@@ -74,12 +89,21 @@ QString secondsText(double s)
     return QLocale().toString(s, 'f', 2);
 }
 
+/** What File > New makes; a tab still showing it can take the next opened scene without asking. */
+QJsonObject defaultSceneJson()
+{
+    Project p;
+    p.newDefault();
+    return p.scene().toJson();
+}
+
 } // namespace
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
     m_project = new Project(this);
     m_client = new SpaceStationClient(this);
+    m_online = new OnlineUpdates(this);
     m_hid = new HidDock(this);
     m_devicesEnabled = qEnvironmentVariableIntValue("FLYGLOW_NO_DEVICE") == 0;
 
@@ -134,26 +158,15 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     m_library->reload();
     wireProject();
     wireDevices();
+    wireOnline();
     wireShortcuts();
     qApp->installEventFilter(this);
 
     retranslateUi();
 
-    QString err;
-    QFile autosave(autosavePath());
-    bool restored = false;
-    if (autosave.open(QIODevice::ReadOnly)) {
-        const QJsonDocument doc = QJsonDocument::fromJson(autosave.readAll());
-        restored = doc.isObject() && m_project->loadJson(doc.object(), &err);
-        const QString lastPath = settings.value("file/last").toString();
-        if (restored && !lastPath.isEmpty() && QFileInfo::exists(lastPath)) {
-            Project probe;
-            if (probe.load(lastPath) && QJsonDocument(probe.scene().toJson()) == doc)
-                m_project->load(lastPath);
-        }
-    }
-    if (!restored)
+    if (!restoreSession() && !restoreLegacyAutosave())
         m_project->newDefault();
+    setAcceptDrops(true);
 
     m_dock->setBrushSize(1);
     m_dock->setBrushHardness(1.0);
@@ -174,9 +187,67 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     resize(1400, 860);
     restoreGeometry(settings.value("window/geometry").toByteArray());
+    // Once the window is up and settled; each check runs at most once a day.
+    QTimer::singleShot(5000, m_online, &OnlineUpdates::checkDaily);
 }
 
 MainWindow::~MainWindow() = default;
+
+void MainWindow::wireOnline()
+{
+    connect(m_online, &OnlineUpdates::appUpdateAvailable, this, [this](const QString& version, const QUrl& page) {
+        m_updateVersion = version;
+        m_updatePage = page;
+        m_updateBtn->setText(tr("FlyGlow %1").arg(version));
+        m_updateBtn->setVisible(true);
+    });
+    connect(m_online, &OnlineUpdates::presetsSynced, this, [this](int added, int updated, int removed) {
+        if (added + updated + removed > 0) {
+            statusBar()->showMessage(tr("Preset library updated: %1 new, %2 changed.").arg(added).arg(updated), 8000);
+            if (m_presetBrowser && m_presetBrowser->isVisible())
+                m_presetBrowser->reload();
+        } else if (m_manualOnline) {
+            statusBar()->showMessage(tr("The preset library is up to date."), 4000);
+        }
+        m_manualOnline = false;
+    });
+    connect(m_online, &OnlineUpdates::presetSyncFailed, this, [this](const QString& message) {
+        if (m_manualOnline)
+            QMessageBox::warning(m_presetBrowser && m_presetBrowser->isVisible() ? static_cast<QWidget*>(m_presetBrowser)
+                                                                                 : this,
+                                 tr("Preset library"), tr("Could not update the preset library: %1").arg(message));
+        m_manualOnline = false;
+    });
+    connect(m_online, &OnlineUpdates::appUpToDate, this, [this] {
+        statusBar()->showMessage(tr("FlyGlow %1 is the latest version.").arg(QCoreApplication::applicationVersion()),
+                                 5000);
+    });
+    connect(m_online, &OnlineUpdates::appCheckFailed, this, [this](const QString& message) {
+        statusBar()->showMessage(tr("Could not check for updates: %1").arg(message), 8000);
+    });
+    connect(m_updateBtn, &QToolButton::clicked, this, &MainWindow::showUpdateOffer);
+}
+
+void MainWindow::showUpdateOffer()
+{
+    QMessageBox box(QMessageBox::Information, tr("Update available"),
+                    tr("FlyGlow %1 is out; this is %2.\n\nThe download page lists what is new and has the installer "
+                       "and the portable zip.")
+                        .arg(m_updateVersion, QCoreApplication::applicationVersion()),
+                    QMessageBox::NoButton, this);
+    QAbstractButton* download = box.addButton(tr("Open the download page"), QMessageBox::AcceptRole);
+    QAbstractButton* skip = box.addButton(tr("Skip this version"), QMessageBox::DestructiveRole);
+    box.addButton(tr("Later"), QMessageBox::RejectRole);
+    box.setDefaultButton(qobject_cast<QPushButton*>(download));
+    box.exec();
+    if (box.clickedButton() == download) {
+        QDesktopServices::openUrl(m_updatePage.isValid() ? m_updatePage
+                                                         : QUrl("https://github.com/PsinaDev/FlyGlow/releases/latest"));
+    } else if (box.clickedButton() == skip) {
+        OnlineUpdates::skipVersion(m_updateVersion);
+        m_updateBtn->setVisible(false);
+    }
+}
 
 void MainWindow::changeEvent(QEvent* e)
 {
@@ -207,7 +278,9 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* e)
 
 void MainWindow::retranslateUi()
 {
-    setTip(m_newBtn, tr("New scene (Ctrl+N)"));
+    setTip(m_newBtn, tr("New scene in a new tab (Ctrl+N)"));
+    m_presetsBtn->setText(tr("Presets"));
+    m_presetsBtn->setToolTip(tr("Ready-made scenes to start from (Ctrl+P)"));
     setTip(m_openBtn, tr("Open… (Ctrl+O)"));
     setTip(m_saveBtn, tr("Save (Ctrl+S)"));
     setTip(m_undoBtn, tr("Undo (Ctrl+Z)"));
@@ -295,11 +368,40 @@ QWidget* MainWindow::buildHeader()
     m_redoBtn = flatTool(bar, icons::Id::Redo);
     for (QToolButton* b : {m_newBtn, m_openBtn, m_saveBtn})
         h->addWidget(b);
+    m_presetsBtn = flatTool(bar, icons::Id::Presets);
+    m_presetsBtn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    h->addWidget(m_presetsBtn);
     h->addSpacing(6);
     h->addWidget(m_undoBtn);
     h->addWidget(m_redoBtn);
-    h->addStretch(1);
+    h->addSpacing(10);
 
+    m_tabBar = new QTabBar(bar);
+    m_tabBar->setObjectName("SceneTabs");
+    m_tabBar->setDocumentMode(true);
+    m_tabBar->setDrawBase(false);
+    m_tabBar->setExpanding(false);
+    m_tabBar->setMovable(true);
+    m_tabBar->setElideMode(Qt::ElideRight);
+    m_tabBar->setUsesScrollButtons(true);
+    m_tabBar->setFocusPolicy(Qt::NoFocus);
+    m_tabs.push_back(std::make_unique<Project::Document>());
+    m_tabBar->addTab(QString());
+    addCloseButton(0);
+    h->addWidget(m_tabBar, 1);
+    connect(m_tabBar, &QTabBar::currentChanged, this, &MainWindow::switchTab);
+    connect(m_tabBar, &QTabBar::tabMoved, this, [this](int from, int to) {
+        auto doc = std::move(m_tabs[size_t(from)]);
+        m_tabs.erase(m_tabs.begin() + from);
+        m_tabs.insert(m_tabs.begin() + to, std::move(doc));
+        m_activeTab = m_tabBar->currentIndex();
+    });
+
+    m_updateBtn = new QToolButton(bar);
+    m_updateBtn->setObjectName("Update");
+    m_updateBtn->setCursor(Qt::PointingHandCursor);
+    m_updateBtn->setVisible(false);
+    h->addWidget(m_updateBtn);
     m_statusPill = new QLabel(bar);
     m_statusPill->setObjectName("StatusPill");
     h->addWidget(m_statusPill);
@@ -321,7 +423,8 @@ QWidget* MainWindow::buildHeader()
     m_sendBtn->setCursor(Qt::PointingHandCursor);
     h->addWidget(m_sendBtn);
 
-    connect(m_newBtn, &QToolButton::clicked, this, &MainWindow::newFile);
+    connect(m_newBtn, &QToolButton::clicked, this, &MainWindow::newTab);
+    connect(m_presetsBtn, &QToolButton::clicked, this, &MainWindow::openPresetBrowser);
     connect(m_openBtn, &QToolButton::clicked, this, &MainWindow::openFile);
     connect(m_saveBtn, &QToolButton::clicked, this, [this] { saveFile(false); });
     connect(m_undoBtn, &QToolButton::clicked, m_project, &Project::undo);
@@ -526,6 +629,7 @@ void MainWindow::wireProject()
         m_project->notifyLayerChanged(m_project->currentIndex());
     });
     connect(m_timeline, &Timeline::keyContextMenu, this, &MainWindow::showKeyMenu);
+    connect(m_timeline, &Timeline::contextMenuRequested, this, &MainWindow::showTimelineMenu);
 }
 
 void MainWindow::wireShortcuts()
@@ -541,7 +645,14 @@ void MainWindow::wireShortcuts()
     shortcut(QKeySequence::Save, [this] { saveFile(false); });
     shortcut(QKeySequence("Ctrl+Shift+S"), [this] { saveFile(true); });
     shortcut(QKeySequence::Open, [this] { openFile(); });
-    shortcut(QKeySequence::New, [this] { newFile(); });
+    shortcut(QKeySequence("Ctrl+P"), [this] { openPresetBrowser(); });
+    shortcut(QKeySequence("Ctrl+Shift+P"), [this] { saveAsPreset(); });
+    shortcut(QKeySequence::New, [this] { newTab(); });
+    shortcut(QKeySequence("Ctrl+T"), [this] { newTab(); });
+    shortcut(QKeySequence("Ctrl+W"), [this] { closeTab(m_activeTab); });
+    shortcut(QKeySequence("Ctrl+Tab"), [this] { switchTab((m_activeTab + 1) % int(m_tabs.size())); });
+    shortcut(QKeySequence("Ctrl+Shift+Tab"),
+             [this] { switchTab((m_activeTab + int(m_tabs.size()) - 1) % int(m_tabs.size())); });
     // Text fields claim plain keys through ShortcutOverride, so these stay out of the way while typing.
     shortcut(QKeySequence(Qt::Key_Space), [this] { setPlaying(!m_playing); });
     shortcut(QKeySequence(Qt::Key_B), [this] { selectTool(PaintTool::Brush); });
@@ -639,7 +750,14 @@ void MainWindow::tick()
     const double dt = m_clock.restart() / 1000.0;
     if (m_playing) {
         const double loop = std::max(0.1, m_project->scene().loopSeconds);
-        m_phase = std::fmod(m_phase + dt / loop, 1.0);
+        const double next = m_phase + dt / loop;
+        if (m_timeline->hasSelection()) {
+            // Playback loops inside the selection, to judge a cut before trimming to it.
+            const double from = m_timeline->selectionFrom(), to = m_timeline->selectionTo();
+            m_phase = next >= from && next < to ? next : from + std::fmod(std::max(0.0, next - from), to - from);
+        } else {
+            m_phase = std::fmod(next, 1.0);
+        }
         m_timeline->setPhase(m_phase);
         renderPreview();
     }
@@ -650,6 +768,8 @@ void MainWindow::setPlaying(bool on)
     m_playing = on;
     m_playBtn->setIcon(icons::get(on ? icons::Id::Pause : icons::Id::Play));
     m_clock.restart();
+    if (m_dockPreview)
+        renderPreview();   // paused, the dock preview shows the playhead rather than the start of its frame
 }
 
 void MainWindow::setPhase(double phase)
@@ -666,19 +786,13 @@ void MainWindow::renderPreview()
     if (m_dockPreview) {
         int frames = 1, period = 1;
         bakeTiming(scene, m_maxFrames, &frames, &period);
-        // Each frame holds for its whole step, and dithering error carries over only into the frame right after it.
-        const int frame = std::min(frames - 1, int(m_phase * frames));
-        if (frame != m_previewFrame) {
-            if (m_previewFrame >= 0 && frame == (m_previewFrame + 1) % frames)
-                m_previewErrIn = m_previewErrOut;
-            else
-                m_previewErrIn.clear();
-            m_previewFrame = frame;
-        }
-        scene.render(double(frame) / frames, LedLayout::cd2(), out);
-        m_previewErrOut = m_previewErrIn;
+        // Each frame holds for its whole step. The epsilon keeps a playhead parked on a frame boundary
+        // (0.29 * 100 = 28.999...) on that frame.
+        const int frame = std::min(frames - 1, int(m_phase * frames + 1e-6));
+        // Paused, the preview shows the playhead itself: a keyframe between two dock frames is what is being edited.
+        scene.render(m_playing ? double(frame) / frames : m_phase, LedLayout::cd2(), out);
         std::vector<uchar> codes(out.size() * 3);
-        encodeFrame(out, scene.outputGamma, scene.dither && frames > 1 ? &m_previewErrOut : nullptr, codes.data());
+        encodeFrame(out, scene.outputGamma, codes.data(), scene.darkLift);
         auto light = [](uchar v) { return v <= kDockDarkValue ? 0.f : float(std::pow(v / 255.0, kDockGamma)); };
         for (size_t i = 0; i < out.size(); ++i)
             out[i] = {light(codes[i * 3]), light(codes[i * 3 + 1]), light(codes[i * 3 + 2])};
@@ -936,6 +1050,40 @@ void MainWindow::showKeyMenu(int index, const QPoint& globalPos)
     menu.exec(globalPos);
 }
 
+void MainWindow::showTimelineMenu(double phase, const QPoint& globalPos)
+{
+    QMenu menu(this);
+    const bool selected = m_timeline->hasSelection();
+    QAction* trim = menu.addAction(tr("Trim the loop to the selection"), this, &MainWindow::trimToSelection);
+    trim->setEnabled(selected);
+    QAction* clear = menu.addAction(tr("Clear selection"), m_timeline, &Timeline::clearSelection);
+    clear->setEnabled(selected);
+    if (!selected) {
+        menu.addSeparator();
+        QAction* hint = menu.addAction(tr("Drag below the ruler to select part of the loop"));
+        hint->setEnabled(false);
+    }
+    Q_UNUSED(phase);
+    menu.exec(globalPos);
+}
+
+void MainWindow::trimToSelection()
+{
+    if (!m_timeline->hasSelection())
+        return;
+    const double from = m_timeline->selectionFrom(), to = m_timeline->selectionTo();
+    m_project->checkpoint();
+    m_project->scene().trim(from, to);
+    m_timeline->clearSelection();
+    m_selectedKey = -1;
+    m_project->notifyLayersChanged();
+    m_project->notifySettingsChanged();
+    setPhase(0);
+    statusBar()->showMessage(tr("The loop now runs %1 s: only the selected part is left.")
+                                 .arg(secondsText(m_project->scene().loopSeconds)),
+                             5000);
+}
+
 void MainWindow::replaceCurrentEffect(const QString& typeId)
 {
     Layer* l = m_project->currentLayer();
@@ -1075,8 +1223,8 @@ void MainWindow::showOutputSettings()
     asDock->setChecked(m_dockPreview);
     asDockRow->addWidget(asDock);
     v->addLayout(asDockRow);
-    addNote(tr("Shows what the dock will play: each frame held for the dock's step, the output gamma, the 8-bit "
-               "levels and dithering. The LEDs themselves are more saturated than a monitor can show."));
+    addNote(tr("Shows what the dock will play: each frame held for the dock's step, the output gamma and the 8-bit "
+               "levels. The LEDs themselves are more saturated than a monitor can show."));
 
     v->addSpacing(8);
     v->addWidget(new QLabel(tr("Output gamma"), &dlg));
@@ -1089,14 +1237,14 @@ void MainWindow::showOutputSettings()
                "values make dark colours darker."));
 
     v->addSpacing(8);
-    auto* ditherRow = new QHBoxLayout();
-    ditherRow->addWidget(new QLabel(tr("Temporal dithering"), &dlg), 1);
-    auto* dither = new ToggleSwitch(&dlg);
-    dither->setChecked(scene.dither);
-    ditherRow->addWidget(dither);
-    v->addLayout(ditherRow);
-    addNote(tr("Spreads the 8-bit rounding error across frames, smoothing slow dark fades. Off by default: dim "
-               "colours near the point where the LEDs switch on can flicker from frame to frame."));
+    v->addWidget(new QLabel(tr("Lift dark tones"), &dlg));
+    auto* lift = new SliderRow(&dlg);
+    lift->setRange(0, 100, 1, "%");
+    lift->setValue(scene.darkLift * 100.0);
+    v->addWidget(lift);
+    addNote(tr("Raises the darkest tones the way gamma 2.2 does while the mids and highs keep the output gamma: slow "
+               "dark fades step less and stay lit instead of dropping out at the bottom, and colours keep their hue. "
+               "0% sends the plain output curve."));
 
     v->addSpacing(8);
     v->addWidget(new QLabel(tr("Maximum frames per animation"), &dlg));
@@ -1106,6 +1254,38 @@ void MainWindow::showOutputSettings()
     v->addWidget(frames);
     addNote(tr("More frames play smoother but upload longer (~0.1 s per frame). Space Station never sends more than "
                "200."));
+
+    v->addSpacing(8);
+    v->addWidget(new QLabel(tr("Opening a scene"), &dlg));
+    auto* openIn = new QComboBox(&dlg);
+    openIn->addItem(tr("Ask every time"), QStringLiteral("ask"));
+    openIn->addItem(tr("In the current tab"), QStringLiteral("here"));
+    openIn->addItem(tr("In a new tab"), QStringLiteral("tab"));
+    openIn->setCurrentIndex(std::max(0, openIn->findData(QSettings().value("file/openIn", "ask").toString())));
+    v->addWidget(openIn);
+
+    v->addSpacing(8);
+    auto* appRow = new QHBoxLayout();
+    appRow->addWidget(new QLabel(tr("Check for FlyGlow updates"), &dlg), 1);
+    auto* appCheck = new ToggleSwitch(&dlg);
+    appCheck->setChecked(OnlineUpdates::appCheckEnabled());
+    appRow->addWidget(appCheck);
+    v->addLayout(appRow);
+    auto* presetRow = new QHBoxLayout();
+    presetRow->addWidget(new QLabel(tr("Download new presets"), &dlg), 1);
+    auto* presetSync = new ToggleSwitch(&dlg);
+    presetSync->setChecked(OnlineUpdates::presetSyncEnabled());
+    presetRow->addWidget(presetSync);
+    v->addLayout(presetRow);
+    addNote(tr("Once a day FlyGlow asks GitHub for the latest release and for the list of presets in the online "
+               "library, and downloads the presets it does not have yet. Nothing is sent."));
+    auto* checkNow = new QPushButton(tr("Check now"), &dlg);
+    connect(checkNow, &QPushButton::clicked, this, [this] {
+        m_manualOnline = true;
+        m_online->checkApp(true);
+        m_online->syncPresets(true);
+    });
+    v->addWidget(checkNow, 0, Qt::AlignLeft);
 
     v->addSpacing(8);
     v->addWidget(new QLabel(tr("Language"), &dlg));
@@ -1133,26 +1313,141 @@ void MainWindow::showOutputSettings()
 
     m_project->checkpoint();
     scene.outputGamma = gamma->value();
-    scene.dither = dither->isChecked();
+    scene.darkLift = lift->value() / 100.0;
     m_maxFrames = int(std::lround(frames->value()));
     QSettings().setValue("output/maxFrames", m_maxFrames);
     m_dockPreview = asDock->isChecked();
-    m_previewFrame = -1;
     QSettings().setValue("preview/asDock", m_dockPreview);
+    QSettings().setValue("file/openIn", openIn->currentData().toString());
+    OnlineUpdates::setAppCheckEnabled(appCheck->isChecked());
+    OnlineUpdates::setPresetSyncEnabled(presetSync->isChecked());
     m_project->notifySettingsChanged();
     const QString newLanguage = language->currentData().toString();
     if (newLanguage != currentLanguage)
         switchLanguage(newLanguage);
 }
 
-QString MainWindow::autosavePath() const
+QString MainWindow::dataDir() const
 {
-    const QString appDir = QCoreApplication::applicationDirPath();
-    const QString dir = QFileInfo::exists(appDir + "/portable.txt")
-                            ? appDir + "/data"
-                            : QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QDir().mkpath(dir);
-    return dir + "/autosave.flyglow";
+    return appDataDir();
+}
+
+void MainWindow::saveSession()
+{
+    // Saved tabs without changes are reopened from their files; the rest keep their scene in the session.
+    QJsonArray tabs;
+    for (int i = 0; i < int(m_tabs.size()); ++i) {
+        const bool active = i == m_activeTab;
+        const Project::Document& parked = *m_tabs[size_t(i)];
+        const QString path = active ? m_project->filePath() : parked.path;
+        const bool modified = active ? m_project->isModified() : parked.modified;
+        QJsonObject tab{{"path", path}};
+        if (modified || path.isEmpty()) {
+            tab.insert("modified", modified);
+            tab.insert("scene", active ? m_project->scene().toJson() : parked.scene.toJson());
+        }
+        tabs.append(tab);
+    }
+    QSaveFile f(dataDir() + "/session.json");
+    if (f.open(QIODevice::WriteOnly)) {
+        f.write(QJsonDocument(QJsonObject{{"tabs", tabs}, {"active", m_activeTab}}).toJson(QJsonDocument::Compact));
+        if (f.commit())
+            QFile::remove(dataDir() + "/autosave.flyglow");
+    }
+}
+
+bool MainWindow::restoreSession()
+{
+    QFile f(dataDir() + "/session.json");
+    if (!f.open(QIODevice::ReadOnly))
+        return false;
+    const QJsonObject session = QJsonDocument::fromJson(f.readAll()).object();
+    std::vector<std::unique_ptr<Project::Document>> docs;
+    int active = 0;
+    const int savedActive = session.value("active").toInt();
+    const QJsonArray tabs = session.value("tabs").toArray();
+    for (int i = 0; i < tabs.size(); ++i) {
+        const QJsonObject tab = tabs[i].toObject();
+        const QString path = tab.value("path").toString();
+        Project temp;
+        const bool ok = tab.contains("scene") ? temp.loadJson(tab.value("scene").toObject())
+                                              : !path.isEmpty() && temp.load(path);
+        if (!ok)
+            continue;
+        if (i == savedActive)
+            active = int(docs.size());
+        auto doc = std::make_unique<Project::Document>();
+        temp.swapDocument(*doc);
+        if (tab.contains("scene")) {
+            doc->path = path;
+            doc->modified = tab.value("modified").toBool();
+        }
+        docs.push_back(std::move(doc));
+    }
+    if (docs.empty())
+        return false;
+    // The first scene goes into the tab that already exists, the others get tabs of their own.
+    m_project->swapDocument(*docs.front());
+    for (size_t i = 1; i < docs.size(); ++i) {
+        m_tabs.push_back(std::move(docs[i]));
+        const QSignalBlocker block(m_tabBar);
+        m_tabBar->addTab(QString());
+        addCloseButton(m_tabBar->count() - 1);
+    }
+    switchTab(active);
+    updateTitle();
+    return true;
+}
+
+bool MainWindow::restoreLegacyAutosave()
+{
+    // Before tabs, 0.2.1 and older kept one scene in autosave.flyglow.
+    QFile autosave(dataDir() + "/autosave.flyglow");
+    if (!autosave.open(QIODevice::ReadOnly))
+        return false;
+    const QJsonDocument json = QJsonDocument::fromJson(autosave.readAll());
+    Project temp;
+    if (!json.isObject() || !temp.loadJson(json.object()))
+        return false;
+    const QString lastPath = QSettings().value("file/last").toString();
+    if (!lastPath.isEmpty() && QFileInfo::exists(lastPath)) {
+        Project probe;
+        if (probe.load(lastPath) && QJsonDocument(probe.scene().toJson()) == json)
+            temp.load(lastPath);
+    }
+    Project::Document doc;
+    temp.swapDocument(doc);
+    // An untitled scene from the autosave is unsaved work, so closing its tab should offer to save it.
+    doc.modified = doc.path.isEmpty() && doc.scene.toJson() != defaultSceneJson();
+    m_project->swapDocument(doc);
+    updateTitle();
+    return true;
+}
+
+void MainWindow::openExternal(const QStringList& paths)
+{
+    if (isMinimized())
+        showNormal();
+    raise();
+    activateWindow();
+    for (const QString& path : paths)
+        openScene(path);
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent* e)
+{
+    for (const QUrl& url : e->mimeData()->urls())
+        if (url.isLocalFile() && url.toLocalFile().endsWith(".flyglow", Qt::CaseInsensitive)) {
+            e->acceptProposedAction();
+            return;
+        }
+}
+
+void MainWindow::dropEvent(QDropEvent* e)
+{
+    for (const QUrl& url : e->mimeData()->urls())
+        if (url.isLocalFile() && url.toLocalFile().endsWith(".flyglow", Qt::CaseInsensitive))
+            openScene(url.toLocalFile());
 }
 
 bool MainWindow::openFile()
@@ -1161,7 +1456,314 @@ bool MainWindow::openFile()
     const QString path = QFileDialog::getOpenFileName(this, tr("Open scene"), settings.value("file/dir").toString(),
                                                       tr("FlyGlow scenes (*.flyglow)") + QStringLiteral(";;")
                                                           + tr("All files (*)"));
-    return !path.isEmpty() && openPath(path);
+    return !path.isEmpty() && openScene(path);
+}
+
+bool MainWindow::openScene(const QString& path)
+{
+    const QString file = QFileInfo(path).absoluteFilePath();
+    for (int i = 0; i < int(m_tabs.size()); ++i) {
+        const QString open = i == m_activeTab ? m_project->filePath() : m_tabs[size_t(i)]->path;
+        if (!open.isEmpty() && QFileInfo(open).absoluteFilePath().compare(file, Qt::CaseInsensitive) == 0) {
+            switchTab(i);
+            return true;
+        }
+    }
+    if (isPristine())
+        return openPath(file);
+    switch (askOpenTarget(QFileInfo(file).completeBaseName())) {
+    case OpenTarget::Here:
+        return confirmDiscard() && openPath(file);
+    case OpenTarget::NewTab:
+        return openInNewTab(file);
+    case OpenTarget::Cancel:
+        break;
+    }
+    return false;
+}
+
+MainWindow::OpenTarget MainWindow::askOpenTarget(const QString& name)
+{
+    const QString remembered = QSettings().value("file/openIn", "ask").toString();
+    if (remembered == "here")
+        return OpenTarget::Here;
+    if (remembered == "tab")
+        return OpenTarget::NewTab;
+    QMessageBox box(QMessageBox::Question, tr("Open scene"), tr("Open “%1” in this tab or in a new one?").arg(name),
+                    QMessageBox::Cancel, this);
+    QAbstractButton* here = box.addButton(tr("Open here"), QMessageBox::AcceptRole);
+    QAbstractButton* tab = box.addButton(tr("Open in a new tab"), QMessageBox::AcceptRole);
+    box.setDefaultButton(qobject_cast<QPushButton*>(tab));
+    auto* remember = new QCheckBox(tr("Remember my choice"), &box);
+    box.setCheckBox(remember);
+    box.exec();
+    const OpenTarget target = box.clickedButton() == here  ? OpenTarget::Here
+                              : box.clickedButton() == tab ? OpenTarget::NewTab
+                                                           : OpenTarget::Cancel;
+    if (target != OpenTarget::Cancel && remember->isChecked())
+        QSettings().setValue("file/openIn", target == OpenTarget::Here ? "here" : "tab");
+    return target;
+}
+
+void MainWindow::openPresetBrowser()
+{
+    if (!m_presetBrowser) {
+        m_presetBrowser = new PresetBrowser(this);
+        connect(m_presetBrowser, &PresetBrowser::openRequested, this, &MainWindow::openPreset);
+        connect(m_presetBrowser, &PresetBrowser::savePresetRequested, this, &MainWindow::saveAsPreset);
+        connect(m_presetBrowser, &PresetBrowser::syncRequested, this, [this] {
+            m_manualOnline = true;
+            m_online->syncPresets(true);
+        });
+    }
+    m_presetBrowser->show();
+    m_presetBrowser->raise();
+    m_presetBrowser->activateWindow();
+}
+
+bool MainWindow::openPreset(const QString& path, bool newTab)
+{
+    const QJsonObject json = PresetLibrary::load(path);
+    Project temp;
+    QString err;
+    if (!temp.loadJson(json, &err)) {
+        QMessageBox::warning(this, tr("Could not open"), err);
+        return false;
+    }
+    OpenTarget target = OpenTarget::NewTab;
+    if (!newTab)
+        target = isPristine() ? OpenTarget::Here : askOpenTarget(presetTitle(temp.scene().preset));
+    if (target == OpenTarget::Cancel || (target == OpenTarget::Here && !confirmDiscard()))
+        return false;
+    // A preset opens as a new, unsaved scene: Save asks where to put it.
+    auto doc = std::make_unique<Project::Document>();
+    temp.swapDocument(*doc);
+    if (target == OpenTarget::NewTab) {
+        addTab(std::move(doc));
+    } else {
+        m_project->swapDocument(*doc);
+        m_timeline->clearSelection();
+        updateTitle();
+    }
+    statusBar()->showMessage(tr("Preset opened: %1").arg(presetTitle(m_project->scene().preset)), 4000);
+    return true;
+}
+
+void MainWindow::saveAsPreset()
+{
+    const QJsonObject current = m_project->scene().preset;
+    QWidget* parent = m_presetBrowser && m_presetBrowser->isVisible() ? static_cast<QWidget*>(m_presetBrowser) : this;
+    QDialog dlg(parent);
+    dlg.setWindowTitle(tr("Save as preset"));
+    dlg.setMinimumWidth(480);
+    auto* v = new QVBoxLayout(&dlg);
+    v->setContentsMargins(18, 14, 18, 14);
+    v->setSpacing(6);
+    v->addWidget(new QLabel(tr("Title"), &dlg));
+    const QString oldTitle = documentName(m_project->filePath(), m_project->scene());
+    auto* title = new QLineEdit(oldTitle, &dlg);
+    v->addWidget(title);
+    v->addSpacing(4);
+    v->addWidget(new QLabel(tr("Description"), &dlg));
+    const QString oldDescription = localizedText(current.value(QStringLiteral("description")));
+    auto* description = new QPlainTextEdit(oldDescription, &dlg);
+    description->setFixedHeight(76);
+    v->addWidget(description);
+    auto* note = new QLabel(tr("The frame under the playhead becomes the cover. The settings at the top of the "
+                               "Inspector are saved with the preset: right-click a setting in the Inspector to add it "
+                               "there."),
+                            &dlg);
+    note->setObjectName("Dim");
+    note->setWordWrap(true);
+    v->addWidget(note);
+    auto* box = new QDialogButtonBox(QDialogButtonBox::Save | QDialogButtonBox::Cancel, &dlg);
+    box->button(QDialogButtonBox::Save)->setObjectName("Primary");
+    v->addSpacing(8);
+    v->addWidget(box);
+    connect(box, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    connect(box, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+    if (dlg.exec() != QDialog::Accepted)
+        return;
+
+    const QString name = title->text().trimmed().isEmpty() ? tr("Untitled") : title->text().trimmed();
+    QString file = name;
+    file.remove(QRegularExpression(QStringLiteral(R"([\\/:*?"<>|])")));
+    file = file.trimmed().isEmpty() ? QStringLiteral("preset") : file.trimmed();
+    const QString path = PresetLibrary::myPresetsDir() + QLatin1Char('/') + file + QStringLiteral(".flyglow");
+    if (QFileInfo::exists(path)
+        && QMessageBox::question(parent, tr("Save as preset"), tr("My presets already has “%1”. Replace it?").arg(file))
+               != QMessageBox::Yes)
+        return;
+
+    // Texts the user left as they were keep every language they came with.
+    const QString lang = QLocale().name().left(2);
+    QJsonObject preset = current;
+    if (name != oldTitle || !preset.contains(QStringLiteral("title")))
+        preset.insert(QStringLiteral("title"), QJsonObject{{lang, name}});
+    const QString text = description->toPlainText().trimmed();
+    if (text != oldDescription)
+        preset.insert(QStringLiteral("description"), QJsonObject{{lang, text}});
+    if (text.isEmpty())
+        preset.remove(QStringLiteral("description"));
+    preset.insert(QStringLiteral("cover"), std::round(m_phase * 1000.0) / 1000.0);
+    preset.remove(QStringLiteral("order"));
+    QJsonObject json = m_project->scene().toJson();
+    json.insert(QStringLiteral("preset"), preset);
+    QSaveFile f(path);
+    if (!f.open(QIODevice::WriteOnly) || f.write(QJsonDocument(json).toJson(QJsonDocument::Compact)) < 0
+        || !f.commit()) {
+        QMessageBox::warning(parent, tr("Could not save"), QDir::toNativeSeparators(path));
+        return;
+    }
+    statusBar()->showMessage(tr("Saved to My presets: %1").arg(name), 4000);
+    if (m_presetBrowser && m_presetBrowser->isVisible())
+        m_presetBrowser->reveal(path);
+}
+
+QString MainWindow::documentName(const QString& path, const Scene& scene) const
+{
+    if (!path.isEmpty())
+        return QFileInfo(path).completeBaseName();
+    const QString preset = presetTitle(scene.preset);
+    return preset.isEmpty() ? tr("Untitled") : preset;
+}
+
+bool MainWindow::openInNewTab(const QString& path)
+{
+    Project temp;
+    QString err;
+    if (!temp.load(path, &err)) {
+        QMessageBox::warning(this, tr("Could not open"), QDir::toNativeSeparators(path) + "\n\n" + err);
+        return false;
+    }
+    auto doc = std::make_unique<Project::Document>();
+    temp.swapDocument(*doc);
+    addTab(std::move(doc));
+    QSettings settings;
+    settings.setValue("file/dir", QFileInfo(path).absolutePath());
+    settings.setValue("file/last", path);
+    return true;
+}
+
+bool MainWindow::confirmDiscard()
+{
+    if (!m_project->isModified())
+        return true;
+    const QString name = documentName(m_project->filePath(), m_project->scene());
+    const auto answer = QMessageBox::question(this, tr("Unsaved changes"), tr("Save changes to “%1”?").arg(name),
+                                              QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    if (answer == QMessageBox::Cancel)
+        return false;
+    return answer == QMessageBox::Discard || saveFile(false);
+}
+
+bool MainWindow::isPristine() const
+{
+    return m_project->filePath().isEmpty() && !m_project->canUndo()
+        && m_project->scene().toJson() == defaultSceneJson();
+}
+
+void MainWindow::newTab()
+{
+    Project temp;
+    temp.newDefault();
+    auto doc = std::make_unique<Project::Document>();
+    temp.swapDocument(*doc);
+    addTab(std::move(doc));
+}
+
+void MainWindow::addTab(std::unique_ptr<Project::Document> doc)
+{
+    m_tabs.push_back(std::move(doc));
+    {
+        const QSignalBlocker block(m_tabBar);
+        m_tabBar->addTab(QString());
+    }
+    addCloseButton(m_tabBar->count() - 1);
+    switchTab(m_tabBar->count() - 1);
+}
+
+void MainWindow::addCloseButton(int index)
+{
+    // QTabBar puts a tab's widget flush against its right edge, so the margin lives in a container around it.
+    auto* box = new QWidget(m_tabBar);
+    auto* layout = new QHBoxLayout(box);
+    layout->setContentsMargins(6, 0, 6, 0);
+    auto* close = new QToolButton(box);
+    close->setObjectName("TabClose");
+    close->setIcon(QIcon(QStringLiteral(":/ui/close.svg")));
+    close->setIconSize(QSize(16, 16));
+    close->setFixedSize(18, 18);
+    close->setCursor(Qt::PointingHandCursor);
+    layout->addWidget(close);
+    // Tabs move, so the button looks up where it is when clicked.
+    connect(close, &QToolButton::clicked, this, [this, box] {
+        for (int i = 0; i < m_tabBar->count(); ++i)
+            if (m_tabBar->tabButton(i, QTabBar::RightSide) == box)
+                closeTab(i);
+    });
+    m_tabBar->setTabButton(index, QTabBar::RightSide, box);
+}
+
+void MainWindow::switchTab(int index)
+{
+    if (index < 0 || index >= int(m_tabs.size()))
+        return;
+    if (index != m_activeTab) {
+        m_selectedKey = -1;
+        m_strokeKey = -1;
+        m_timeline->clearSelection();
+        m_project->swapDocument(*m_tabs[size_t(index)]);
+        std::swap(m_tabs[size_t(m_activeTab)], m_tabs[size_t(index)]);
+        m_activeTab = index;
+        if (!m_project->filePath().isEmpty())
+            QSettings().setValue("file/last", m_project->filePath());
+    }
+    {
+        const QSignalBlocker block(m_tabBar);
+        m_tabBar->setCurrentIndex(index);
+    }
+    updateTitle();
+}
+
+void MainWindow::closeTab(int index)
+{
+    if (index < 0 || index >= int(m_tabs.size()))
+        return;
+    switchTab(index);
+    if (!confirmDiscard())
+        return;
+    if (m_tabs.size() == 1) {
+        m_project->newDefault();
+        QSettings().remove("file/last");
+        updateTitle();
+        return;
+    }
+    // Park the closing scene behind a neighbour, then drop it with its tab.
+    switchTab(index + 1 < int(m_tabs.size()) ? index + 1 : index - 1);
+    m_tabs.erase(m_tabs.begin() + index);
+    if (m_activeTab > index)
+        --m_activeTab;
+    {
+        const QSignalBlocker block(m_tabBar);
+        m_tabBar->removeTab(index);
+        m_tabBar->setCurrentIndex(m_activeTab);
+    }
+    updateTitle();
+}
+
+void MainWindow::updateTabs()
+{
+    for (int i = 0; i < m_tabBar->count() && i < int(m_tabs.size()); ++i) {
+        const bool active = i == m_activeTab;
+        const QString path = active ? m_project->filePath() : m_tabs[size_t(i)]->path;
+        const bool modified = active ? m_project->isModified() : m_tabs[size_t(i)]->modified;
+        const QString name = documentName(path, active ? m_project->scene() : m_tabs[size_t(i)]->scene);
+        m_tabBar->setTabText(i, modified ? name + QStringLiteral(" •") : name);
+        m_tabBar->setTabToolTip(i, path.isEmpty() ? name : QDir::toNativeSeparators(path));
+        if (QWidget* close = m_tabBar->tabButton(i, QTabBar::RightSide))
+            close->setToolTip(tr("Close tab (Ctrl+W)"));
+    }
 }
 
 bool MainWindow::openPath(const QString& path)
@@ -1171,6 +1773,7 @@ bool MainWindow::openPath(const QString& path)
         QMessageBox::warning(this, tr("Could not open"), QDir::toNativeSeparators(path) + "\n\n" + err);
         return false;
     }
+    m_timeline->clearSelection();
     QSettings settings;
     settings.setValue("file/dir", QFileInfo(path).absolutePath());
     settings.setValue("file/last", path);
@@ -1183,8 +1786,12 @@ bool MainWindow::saveFile(bool saveAs)
     QSettings settings;
     QString path = m_project->filePath();
     if (saveAs || path.isEmpty()) {
+        // A scene opened from a preset is offered under the preset's title.
+        QString suggested = presetTitle(m_project->scene().preset);
+        suggested.remove(QRegularExpression(QStringLiteral(R"([\\/:*?"<>|])")));
         path = QFileDialog::getSaveFileName(this, tr("Save scene"),
-                                            settings.value("file/dir").toString() + '/' + tr("My lighting")
+                                            settings.value("file/dir").toString() + '/'
+                                                + (suggested.isEmpty() ? tr("My lighting") : suggested)
                                                 + QStringLiteral(".flyglow"),
                                             tr("FlyGlow scenes (*.flyglow)"));
         if (path.isEmpty())
@@ -1204,35 +1811,16 @@ bool MainWindow::saveFile(bool saveAs)
     return true;
 }
 
-void MainWindow::newFile()
-{
-    if (m_project->isModified() && !m_project->filePath().isEmpty()) {
-        const auto answer = QMessageBox::question(this, tr("New scene"), tr("Save changes to the current scene?"),
-                                                  QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-        if (answer == QMessageBox::Cancel)
-            return;
-        if (answer == QMessageBox::Save && !saveFile(false))
-            return;
-    }
-    m_project->newDefault();
-    QSettings().remove("file/last");
-    updateTitle();
-}
-
 void MainWindow::updateTitle()
 {
-    const QString name = m_project->filePath().isEmpty() ? tr("Untitled")
-                                                         : QFileInfo(m_project->filePath()).completeBaseName();
+    const QString name = documentName(m_project->filePath(), m_project->scene());
     setWindowTitle(QStringLiteral("%1%2 — FlyGlow").arg(name, m_project->isModified() ? QStringLiteral(" •") : QString()));
+    updateTabs();
 }
 
 void MainWindow::closeEvent(QCloseEvent* e)
 {
-    QSaveFile f(autosavePath());
-    if (f.open(QIODevice::WriteOnly)) {
-        f.write(QJsonDocument(m_project->scene().toJson()).toJson(QJsonDocument::Compact));
-        f.commit();
-    }
+    saveSession();
     QSettings settings;
     settings.setValue("window/geometry", saveGeometry());
     if (!m_project->filePath().isEmpty())

@@ -1,5 +1,7 @@
 #include "ShaderRenderer.h"
 
+#include "core/LedLayout.h"
+
 #include <QOffscreenSurface>
 #include <QOpenGLContext>
 #include <QOpenGLExtraFunctions>
@@ -17,7 +19,17 @@ namespace {
 ShaderRenderer* g_instance = nullptr;
 
 constexpr int kWidth = 224;
-constexpr int kHeight = 190;
+
+// The frame takes the proportions of the dock outline's bounding box, which LedSampler stretches it over,
+// so a circle in the shader stays a circle on the LEDs (224 x 203).
+int frameHeight()
+{
+    static const int height = [] {
+        const QRectF box = LedLayout::cd2().outline().boundingRect();
+        return int(std::lround(kWidth * box.height() / box.width()));
+    }();
+    return height;
+}
 // Every pause in typing compiles a new program; past this many the cache starts over.
 constexpr int kMaxPrograms = 24;
 
@@ -151,7 +163,7 @@ ShaderRenderer* ShaderRenderer::instance()
 
 QSize ShaderRenderer::frameSize()
 {
-    return {kWidth, kHeight};
+    return {kWidth, frameHeight()};
 }
 
 bool ShaderRenderer::isAvailable()
@@ -189,7 +201,7 @@ bool ShaderRenderer::makeCurrent()
     QOpenGLExtraFunctions* gl = m_context->extraFunctions();
     gl->glGenTextures(1, &m_target);
     gl->glBindTexture(GL_TEXTURE_2D, m_target);
-    gl->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, kWidth, kHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    gl->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, kWidth, frameHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     gl->glGenFramebuffers(1, &m_fbo);
@@ -203,6 +215,15 @@ bool ShaderRenderer::makeCurrent()
     gl->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, black);
     gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // The layers below a filter shader, refilled every frame.
+    gl->glGenTextures(1, &m_input);
+    gl->glBindTexture(GL_TEXTURE_2D, m_input);
+    gl->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, kWidth, frameHeight(), 0, GL_RGBA, GL_FLOAT, nullptr);
+    gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     gl->glGenVertexArrays(1, &m_vao);
     m_vertex = compileStage(gl, GL_VERTEX_SHADER, {QByteArray(kVertexSource)}, nullptr);
@@ -243,13 +264,13 @@ void ShaderRenderer::release()
             gl->glDeleteVertexArrays(1, &m_vao);
         if (m_fbo)
             gl->glDeleteFramebuffers(1, &m_fbo);
-        for (GLuint* t : {&m_target, &m_black})
+        for (GLuint* t : {&m_target, &m_black, &m_input})
             if (*t)
                 gl->glDeleteTextures(1, t);
         m_context->doneCurrent();
     }
     m_programs.clear();
-    m_vertex = m_vao = m_fbo = m_target = m_black = 0;
+    m_vertex = m_vao = m_fbo = m_target = m_black = m_input = 0;
     m_context.reset();
     m_surface.reset();
 }
@@ -336,8 +357,9 @@ ShaderCompileResult ShaderRenderer::compile(const QString& source)
     return result;
 }
 
-QImage ShaderRenderer::render(const QString& source, const ShaderTime& t)
+QImage ShaderRenderer::render(const QString& source, const ShaderTime& t, const ShaderInput* input)
 {
+    const bool hasInput = input && input->rgba.size() == size_t(kWidth) * size_t(frameHeight()) * 4;
     if (!makeCurrent())
         return {};
     const Program* p = program(source);
@@ -345,14 +367,18 @@ QImage ShaderRenderer::render(const QString& source, const ShaderTime& t)
     if (p->result.ok) {
         QOpenGLExtraFunctions* gl = m_context->extraFunctions();
         gl->glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-        gl->glViewport(0, 0, kWidth, kHeight);
+        gl->glViewport(0, 0, kWidth, frameHeight());
         gl->glDisable(GL_BLEND);
         gl->glDisable(GL_DEPTH_TEST);
         gl->glUseProgram(p->id);
 
         const float zeros[4] = {0, 0, 0, 0};
-        const float ones[12] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-        gl->glUniform3f(p->resolution, float(kWidth), float(kHeight), 1.f);
+        float channelSizes[12] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+        if (hasInput) {
+            channelSizes[0] = float(kWidth);
+            channelSizes[1] = float(frameHeight());
+        }
+        gl->glUniform3f(p->resolution, float(kWidth), float(frameHeight()), 1.f);
         gl->glUniform1f(p->time, float(t.time));
         gl->glUniform1f(p->timeDelta, 0.02f);
         gl->glUniform1f(p->frameRate, 50.f);
@@ -361,7 +387,7 @@ QImage ShaderRenderer::render(const QString& source, const ShaderTime& t)
         // A fixed date keeps renders repeatable; only the seconds follow iTime.
         gl->glUniform4f(p->date, 2026.f, 0.f, 1.f, float(t.time));
         gl->glUniform1f(p->sampleRate, 44100.f);
-        gl->glUniform3fv(p->channelResolution, 4, ones);
+        gl->glUniform3fv(p->channelResolution, 4, channelSizes);
         gl->glUniform1fv(p->channelTime, 4, zeros);
         gl->glUniform1f(p->phase, float(t.phase));
         gl->glUniform1f(p->loop, float(t.loop));
@@ -370,14 +396,20 @@ QImage ShaderRenderer::render(const QString& source, const ShaderTime& t)
             gl->glBindTexture(GL_TEXTURE_2D, m_black);
             gl->glUniform1i(p->channels[k], k);
         }
+        if (hasInput) {
+            gl->glActiveTexture(GL_TEXTURE0);
+            gl->glBindTexture(GL_TEXTURE_2D, m_input);
+            gl->glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+            gl->glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, kWidth, frameHeight(), GL_RGBA, GL_FLOAT, input->rgba.data());
+        }
 
         gl->glBindVertexArray(m_vao);
         gl->glDrawArrays(GL_TRIANGLES, 0, 3);
         gl->glBindVertexArray(0);
 
-        image = QImage(kWidth, kHeight, QImage::Format_RGBA8888);
+        image = QImage(kWidth, frameHeight(), QImage::Format_RGBA8888);
         gl->glPixelStorei(GL_PACK_ALIGNMENT, 4);
-        gl->glReadPixels(0, 0, kWidth, kHeight, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+        gl->glReadPixels(0, 0, kWidth, frameHeight(), GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
         // GL rows run bottom-up, like Shadertoy's fragCoord.
         image = image.flipped(Qt::Vertical);
     }

@@ -35,28 +35,44 @@ The CD2 dock has 162 good RGB LEDs, but the effects in Flydigi Space Station loo
 the frames it receives, so FlyGlow renders better frames and uploads them.
 
 - **21 smooth effects.** Aurora, fire, plasma, lava lamp, rainbow waves, ripples, visor, comets, stars, rain,
-  sparkles, fireflies and more. Linear-light rendering, OKLab blending and up to 200 frames per loop with temporal
-  dithering: no banding, no muddy gradient midpoints.
-- **Layers like iCUE.** Stack effects with Normal, Add, Screen, Multiply or Lighten blending, set opacity, paint the
-  area each layer covers.
+  sparkles, fireflies and more. Linear-light rendering, OKLab blending and up to 200 frames per loop: no muddy
+  gradient midpoints, smooth slow fades.
+- **Preset gallery.** Ready-made scenes to start from: superheroes, games, arcade classics, emoji, animals, nature,
+  space, holidays, patterns and calm mood lighting, with previews that play under the mouse. Many presets have a
+  few settings of their own (colours, variants, decorations) at the top of the Inspector. Save your own scenes as
+  presets, add folders such as Downloads to the gallery, and get new presets from the online library without
+  reinstalling.
+- **Layers like iCUE.** Stack effects with Normal, Add, Screen, Multiply or Lighten blending, set opacity, recolour a
+  layer with hue, saturation, lightness, contrast or a tint, shift and speed up its timing, paint the area each
+  layer covers. Pictures (media and painted layers) also get sharpen, blur and glow.
+- **Filters.** A filter layer reworks everything below it. Glitch tears rows sideways, splits the RGB channels, drops
+  in noise blocks and flickers in bursts, with strength, bursts per loop, burst length and seed to set and a seamless
+  loop. Glint sweeps a soft band of light over whatever is lit below, brightening it in its own colour with a touch
+  of the glint's colour, with direction, width, colour, whiteness, strength, passes per loop and sweep time to set.
+  The filter layer's opacity, blend mode and area say how much of the result goes over the original.
 - **Your own animation.** Paint the LEDs directly (size 1 is exactly one LED), set keyframes on the timeline and let
-  FlyGlow interpolate everything in between, smooth, linear or stepped.
+  FlyGlow interpolate everything in between, smooth, linear or stepped. Select part of the loop on the timeline to
+  play just that part and trim the loop to it.
 - **Media import.** PNG/JPEG, GIF, APNG, WebP and MP4/MOV/M4V/AVI/WMV. Each LED averages its own hex cell of the
   picture; fit, zoom, pan, rotate, trim and colour controls included.
 - **Shaders.** Paste a Shadertoy-style GLSL `mainImage`: it runs on the GPU and each LED averages its cell of the
-  frame. A crossfade closes the loop for shaders driven by `iTime`; `iPhase` loops by itself. Built-in presets to
-  start from, `.glsl` files to open and save.
+  frame. A crossfade closes the loop for shaders driven by `iTime`; `iPhase` loops by itself. Commented templates
+  to start from (gradients, plasma, noise, shapes, particles, per-LED pixel work, a filter), `.glsl` files to open and
+  save. With "Process layers below" on, a shader becomes a filter: the layers under it come in as `iChannel0`, one
+  cell per LED, and several such shaders stacked work as a multipass shader. `examples/filters-demo.flyglow` shows a
+  shader filter and a glitch over plasma.
 - **Side by side with Space Station.** Uploads go straight to the dock over USB, so Space Station can stay open for
   the controller and the dock settings.
-- **Everyday comforts.** Undo and redo, `.flyglow` scene files, session autosave, file association, English and
-  Russian UI switchable on the fly.
+- **Everyday comforts.** Undo and redo, `.flyglow` scenes in tabs (files opened from Explorer join the running
+  window), session autosave, file association, English and Russian UI switchable on the fly, a daily check for a
+  newer release.
 
 ## How It Works
 
 ```mermaid
 flowchart LR
     A[Effects and layers] --> B[Composite in linear light]
-    B --> C[Bake up to 200 frames<br/>20 ms steps, dithering]
+    B --> C[Bake up to 200 frames<br/>20 ms steps]
     C --> D[USB HID upload]
     D --> E[CD2 dock plays the loop]
     C -. fallback .-> F[Space Station service] -.-> E
@@ -64,14 +80,15 @@ flowchart LR
 
 - **Rendering.** An effect is a pure function of loop phase, so loops are seamless and the preview shows exactly the
   frames that get baked. Layers are composited in linear light; gradients and fades are mixed in OKLab and follow
-  perceived brightness.
+  perceived brightness. A filter layer gets the layers below already composited and is blended like any other layer.
 - **Baking.** The firmware plays uploaded frames and generates nothing itself: up to 200 frames by default
-  (255 configurable), a frame interval in 20 ms steps, 8 bits per channel. Temporal error diffusion hides 8-bit
-  steps in dark, slow fades.
+  (255 configurable), a frame interval in 20 ms steps, 8 bits per channel. The optional "Lift dark tones" raises
+  the darkest tones toward a gamma-2.2 curve while the mids and highs keep the output gamma, so dark fades step less
+  and stay lit, with hues kept; `examples/dark-lift-test.flyglow` shows it side by side with the plain output.
 - **Upload.** FlyGlow opens the dock's vendor HID interface shared with Space Station's service and writes a Custom
   lighting config, about 85 ms per frame. If the HID path is unavailable, it falls back to Space Station's own
   service pipe. An upload rewrites the dock's stored lighting, so it only happens on "Send to dock".
-- **Protocols.** [docs/hid-protocol.md](docs/hid-protocol.md) covers the direct USB path,
+- **Protocols.** [docs/hid-protocol.md](docs/hid-protocol.md) covers the direct USB path to the dock,
   [docs/ipc-protocol.md](docs/ipc-protocol.md) covers Space Station's service pipe.
 
 ## Installation
@@ -116,6 +133,8 @@ Developer tools built alongside the app:
 - `media_check <file> <dir>` - decodes a clip and writes a filmstrip of the sampled LEDs.
 - `shader_check <shader.glsl> <dir>` - compiles a shader like the Shader layer does, prints driver messages and timing,
   writes GPU frames and the LED result.
+- `scene_check <scene.flyglow> <out.png>` - loads a scene like the app does, validates its preset block and renders
+  loop phases as the dock lights them (preset format: `docs/presets.md`).
 - `ipc_probe` - read-only queries to Space Station's service; `--selftest` runs offline.
 - `FLYGLOW_NO_DEVICE=1` - starts the app without touching the dock.
 

@@ -39,14 +39,19 @@ struct Preset {
     const char* title;
 };
 
+// Starting points to build on; finished themed shaders live in the preset gallery as scenes.
 const Preset kPresets[] = {
+    {"template.glsl", QT_TRANSLATE_NOOP("fg::ShaderEditor", "Blank template")},
     {"", QT_TRANSLATE_NOOP("fg::ShaderEditor", "Rainbow rings")},
-    {"kaleidoscope.glsl", QT_TRANSLATE_NOOP("fg::ShaderEditor", "Kaleidoscope")},
-    {"heartbeat.glsl", QT_TRANSLATE_NOOP("fg::ShaderEditor", "Heartbeat")},
-    {"lava-lamp.glsl", QT_TRANSLATE_NOOP("fg::ShaderEditor", "Lava lamp")},
-    {"warp-stars.glsl", QT_TRANSLATE_NOOP("fg::ShaderEditor", "Warp stars")},
-    {"synthwave.glsl", QT_TRANSLATE_NOOP("fg::ShaderEditor", "Synthwave")},
-    {"pacman.glsl", QT_TRANSLATE_NOOP("fg::ShaderEditor", "Pac-Man")},
+    {"gradient-sweep.glsl", QT_TRANSLATE_NOOP("fg::ShaderEditor", "Gradient sweep")},
+    {"stripes.glsl", QT_TRANSLATE_NOOP("fg::ShaderEditor", "Stripes")},
+    {"plasma.glsl", QT_TRANSLATE_NOOP("fg::ShaderEditor", "Plasma")},
+    {"noise-flow.glsl", QT_TRANSLATE_NOOP("fg::ShaderEditor", "Noise flow")},
+    {"pinwheel.glsl", QT_TRANSLATE_NOOP("fg::ShaderEditor", "Pinwheel")},
+    {"glowing-shape.glsl", QT_TRANSLATE_NOOP("fg::ShaderEditor", "Glowing shape")},
+    {"particles.glsl", QT_TRANSLATE_NOOP("fg::ShaderEditor", "Particles")},
+    {"led-pixels.glsl", QT_TRANSLATE_NOOP("fg::ShaderEditor", "Per-LED pixels")},
+    {"filter.glsl", QT_TRANSLATE_NOOP("fg::ShaderEditor", "Filter for the layers below")},
 };
 
 QTextCharFormat textFormat(const QColor& color, bool bold = false, bool italic = false)
@@ -357,8 +362,9 @@ void ShaderEditor::retranslateUi()
     setWindowTitle(tr("Shader"));
     m_help->setText(tr("GLSL in the Shadertoy style: write mainImage(out vec4 fragColor, in vec2 fragCoord). "
                        "Available: iResolution, iTime, iTimeDelta, iFrame, iDate, iPhase (0..1 through the loop) "
-                       "and iLoop (loop length in seconds); iMouse is always zero. Textures and buffer passes are "
-                       "not supported, iChannel reads as black. Ctrl+Enter applies at once."));
+                       "and iLoop (loop length in seconds); iMouse is always zero. With \"Process layers below\" on, "
+                       "iChannel0 holds the layers under this one; stacked filter shaders work as passes. Other "
+                       "channels read as black. Ctrl+Enter applies at once."));
     m_closeBtn->setText(tr("Close"));
     m_presetsBtn->setText(tr("Presets"));
     m_openBtn->setText(tr("Open .glsl…"));
@@ -428,6 +434,12 @@ void ShaderEditor::loadSource(const QString& source)
     all.insertText(source);
     m_debounce.stop();
     apply();
+    // Code that reads iChannel0 (the filter template, say) wants the layers below; one undo step with the code.
+    ShaderEffect* shader = currentShader();
+    if (shader && !shader->isFilter() && source.contains(QLatin1String("iChannel0"))) {
+        shader->setValue(QStringLiteral("input"), true);
+        m_project->notifyLayersChanged();
+    }
 }
 
 void ShaderEditor::openFile()

@@ -6,6 +6,7 @@ namespace fg {
 
 class LedLayout;
 class ShaderRenderer;
+struct ShaderInput;
 
 /**
  * A Shadertoy-style GLSL mainImage rendered on the GPU and averaged over each LED's cell.
@@ -22,6 +23,8 @@ public:
 
     void render(const RenderContext& ctx, Frame& out) const override;
     bool listedInLibrary() const override { return false; }
+    /** With "input" on, the layers below come in as iChannel0, one flat hex cell per LED. */
+    bool isFilter() const override { return b("input"); }
     std::unique_ptr<Effect> clone() const override;
 
     QJsonObject toJson() const override;
@@ -32,7 +35,7 @@ public:
 
 private:
     bool sample(ShaderRenderer& renderer, const LedLayout& layout, double time, const RenderContext& ctx,
-                std::vector<Rgb>& out) const;
+                const ShaderInput* input, std::vector<Rgb>& out) const;
 
     QString m_source = defaultSource();
 };

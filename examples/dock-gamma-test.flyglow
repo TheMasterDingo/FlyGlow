@@ -4,7 +4,6 @@
  "loopSeconds": 4,
  "brightness": 100,
  "outputGamma": 1.0,
- "dither": false,
  "layers": [
   {
    "name": "Dock gamma test",

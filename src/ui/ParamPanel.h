@@ -19,6 +19,8 @@ public:
 signals:
     void editStarted();
     void changed();
+    /** Right click on the label of a number or colour setting. */
+    void paramContextMenu(const QString& id, const QPoint& globalPos);
 
 private:
     void rebuild();

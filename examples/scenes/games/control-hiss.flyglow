@@ -1,0 +1,84 @@
+{
+ "format": "flyglow",
+ "version": 1,
+ "preset": {
+  "title": {
+   "en": "Control: the Hiss",
+   "ru": "Control: Шипение"
+  },
+  "description": {
+   "en": "Control's Hiss: red static and pulsing rings.",
+   "ru": "Шипение из Control: красные помехи и кольца."
+  },
+  "controls": [
+   {
+    "type": "hue",
+    "label": {
+     "en": "Colour",
+     "ru": "Цвет"
+    },
+    "targets": [
+     {
+      "layer": 0
+     }
+    ],
+    "base": "#ff0d14"
+   },
+   {
+    "type": "number",
+    "label": {
+     "en": "Glow",
+     "ru": "Свечение"
+    },
+    "min": 0,
+    "max": 100,
+    "step": 1,
+    "suffix": "%",
+    "targets": [
+     {
+      "layer": 0,
+      "prop": "glow",
+      "from": 0,
+      "to": 1
+     }
+    ]
+   }
+  ],
+  "group": "Remedy",
+  "cover": 0.1,
+  "tags": [
+   "control",
+   "remedy",
+   "hiss",
+   "jesse faden",
+   "контроль",
+   "ремеди",
+   "шипение"
+  ],
+  "order": 320
+ },
+ "loopSeconds": 4.0,
+ "brightness": 100,
+ "outputGamma": 1.4,
+ "layers": [
+  {
+   "name": "Hiss",
+   "visible": true,
+   "opacity": 1.0,
+   "blend": 0,
+   "effect": {
+    "type": "shader",
+    "params": {
+     "speed": 1.0,
+     "seam": 0.0,
+     "brightness": 110.0,
+     "saturation": 100.0,
+     "zoom": 1.0,
+     "panX": 0.0,
+     "panY": 0.0
+    },
+    "source": "// Control's Hiss: red resonance. Scanlines of red static crawl over the dark, a ring of resonance throbs out from\n// the middle twice a loop and the whole dock flickers with it. Loops through iPhase: keep \"Loop crossfade\" at 0.\nconst float PI2 = 6.2831853;\nfloat h(vec2 p) { vec3 q = fract(vec3(p.xyx) * 0.1031); q += dot(q, q.yzx + 33.33); return fract((q.x + q.y) * q.z); }\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec2 uv = fragCoord / iResolution.xy;\n    vec2 p = (fragCoord - 0.5 * iResolution.xy) / iResolution.y;\n    float t = iPhase;\n    // Static: rows of noise that change eight times a loop, brighter in bands that crawl down.\n    float row = floor(uv.y * 20.0);\n    float frame = floor(t * 8.0);\n    float n = h(vec2(floor(uv.x * 24.0), row + 31.0 * frame));\n    float band = 0.5 + 0.5 * sin(PI2 * (uv.y * 3.0 + t * 2.0));\n    float v = step(0.72, n) * (0.25 + 0.75 * band);\n    // Resonance ring.\n    float f = fract(2.0 * t);\n    float r = length(p) - 0.7 * f;\n    v += 0.9 * exp(-r * r / 0.004) * (1.0 - f);\n    fragColor = vec4(vec3(1.0, 0.05, 0.08) * v, 1.0);\n}\n"
+   }
+  }
+ ]
+}

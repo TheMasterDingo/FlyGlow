@@ -1,0 +1,77 @@
+{
+ "format": "flyglow",
+ "version": 1,
+ "preset": {
+  "title": {
+   "en": "Embers",
+   "ru": "Угли"
+  },
+  "description": {
+   "en": "Glowing coals, slowly brightening and dimming.",
+   "ru": "Тлеющие угли медленно разгораются и тускнеют."
+  },
+  "controls": [
+   {
+    "type": "hue",
+    "label": {
+     "en": "Colour",
+     "ru": "Цвет"
+    },
+    "targets": [
+     {
+      "layer": 0
+     }
+    ],
+    "base": "#ff1a00"
+   },
+   {
+    "type": "opacity",
+    "label": {
+     "en": "Brightness",
+     "ru": "Яркость"
+    },
+    "targets": [
+     {
+      "layer": 0
+     }
+    ]
+   }
+  ],
+  "cover": 0.0,
+  "tags": [
+   "embers",
+   "coals",
+   "fire",
+   "warm",
+   "cosy",
+   "угли",
+   "жар",
+   "уют"
+  ],
+  "order": 100
+ },
+ "loopSeconds": 16.0,
+ "brightness": 100,
+ "outputGamma": 1.4,
+ "layers": [
+  {
+   "name": "Embers",
+   "visible": true,
+   "opacity": 1.0,
+   "blend": 0,
+   "effect": {
+    "type": "shader",
+    "params": {
+     "speed": 1.0,
+     "seam": 0.0,
+     "brightness": 100.0,
+     "saturation": 100.0,
+     "zoom": 1.0,
+     "panX": 0.0,
+     "panY": 0.0
+    },
+    "source": "// Embers: a bed of coals with no flame, dark crusts and glowing cracks that slowly breathe brighter and dimmer,\n// hotter toward the tip, and now and then a spark rising out of it. Noise is read along a circle through time and\n// sparks rise a whole number of times per loop. Loops through iPhase: keep \"Loop crossfade\" at 0.\n\nconst float TAU = 6.2831853;\n// The middle of the dock's rounded triangle, about equally far from its three corners.\nconst vec2 MID = vec2(0.0, -1.6);\n\n// Dock layout units: one LED pitch = 1, x to the right, y down, 0 at the centre of the LEDs.\n// The frame spans the dock outline's bounding box: 17.82 x 16.17 units, centred at (-0.018, 0.220).\nvec2 dockPos(vec2 fragCoord)\n{\n    return (fragCoord / iResolution.xy - 0.5) * vec2(17.82, -16.17) + vec2(-0.018, 0.220);\n}\n\n// Centre of the LED nearest to p, so every LED gets one crisp colour; .z = row 0..15 from the top.\nvec3 ledCell(vec2 p)\n{\n    float r0 = floor((p.y + 6.477) / 0.8636 + 0.5);\n    vec3 best = vec3(0.0);\n    float bestD = 1e9;\n    for (int k = -1; k <= 1; k++) {\n        float row = clamp(r0 + float(k), 0.0, 15.0);\n        float n = row <= 2.0 ? 14.0 + row : 18.0 - row;\n        float off = mod(n, 2.0) == 0.0 ? 0.5 : 0.0;\n        float x = clamp(floor(p.x - off + 0.5) + off, -0.5 * (n - 1.0), 0.5 * (n - 1.0));\n        vec2 c = vec2(x, -6.477 + row * 0.8636);\n        float d = dot(p - c, p - c);\n        if (d < bestD) {\n            bestD = d;\n            best = vec3(c, row);\n        }\n    }\n    return best;\n}\n\n// 1 inside a disc around the LED centre, 0 on the cell border: FlyGlow averages each LED's whole cell, and\n// light on the border would leak into the neighbours. Keeps about 2/3 of the light; brightness 120% evens it out.\nfloat ledCore(vec2 p, vec3 led)\n{\n    return step(length(p - led.xy), 0.46);\n}\n\n// Hashes without sine (Dave Hoskins): uncorrelated between neighbouring integers on every GPU.\nfloat hash(vec2 p)\n{\n    vec3 p3 = fract(vec3(p.xyx) * 0.1031);\n    p3 += dot(p3, p3.yzx + 33.33);\n    return fract((p3.x + p3.y) * p3.z);\n}\n\nfloat hash13(vec3 p3)\n{\n    p3 = fract(p3 * 0.1031);\n    p3 += dot(p3, p3.zyx + 31.32);\n    return fract((p3.x + p3.y) * p3.z);\n}\n\nfloat noise3(vec3 p)\n{\n    vec3 i = floor(p);\n    vec3 f = fract(p);\n    f = f * f * (3.0 - 2.0 * f);\n    float a = mix(mix(hash13(i), hash13(i + vec3(1, 0, 0)), f.x),\n                  mix(hash13(i + vec3(0, 1, 0)), hash13(i + vec3(1, 1, 0)), f.x), f.y);\n    float b = mix(mix(hash13(i + vec3(0, 0, 1)), hash13(i + vec3(1, 0, 1)), f.x),\n                  mix(hash13(i + vec3(0, 1, 1)), hash13(i + vec3(1, 1, 1)), f.x), f.y);\n    return mix(a, b, f.z);\n}\n\nfloat fbm3(vec3 p) { return 0.6 * noise3(p) + 0.3 * noise3(p * 2.1 + 5.0) + 0.1 * noise3(p * 4.3 + 9.0); }\n\n// 1 inside, 0 outside a shape given its signed distance in LED pitches, with a half-LED ramp across the edge,\n// so moving edges glide between LEDs without a wide muddy fringe.\nfloat inside(float sd) { return clamp(0.5 - 2.0 * sd, 0.0, 1.0); }\n\n// Heat 0..1: black, deep red, red, orange; dim levels stay red rather than brown.\nvec3 ember(float h)\n{\n    vec3 c = mix(vec3(0.0), vec3(0.55, 0.0, 0.0), smoothstep(0.0, 0.35, h));\n    c = mix(c, vec3(1.0, 0.1, 0.0), smoothstep(0.35, 0.7, h));\n    return mix(c, vec3(1.0, 0.45, 0.04), smoothstep(0.7, 1.0, h));\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec2 p = dockPos(fragCoord);\n    float T = TAU * iPhase;\n    vec2 ring = vec2(cos(T), sin(T));\n    // Coals: Voronoi cells about two LEDs across with black gaps between them; each coal glows at its own level\n    // and breathes at its own whole-number rate.\n    vec2 g = p / 3.2;\n    vec2 cell = floor(g);\n    float d1 = 9.0, d2 = 9.0;\n    vec2 id = vec2(0.0);\n    for (int j = -1; j <= 1; j++)\n        for (int i = -1; i <= 1; i++) {\n            vec2 c = cell + vec2(i, j);\n            vec2 o = c + 0.15 + 0.7 * vec2(hash(c), hash(c + 17.0));\n            float d = length(g - o);\n            if (d < d1) { d2 = d1; d1 = d; id = c; }\n            else if (d < d2) d2 = d;\n        }\n    float rate = 1.0 + floor(3.0 * hash(id + 5.0));\n    float glow = 0.5 + 0.5 * sin(T * rate + TAU * hash(id + 9.0));\n    float heat = (0.3 + 0.7 * hash(id + 2.0)) * (0.55 + 0.45 * glow) + 0.2 * (1.0 - d1);\n    heat *= smoothstep(0.14, 0.3, d2 - d1);                             // the gaps between coals\n    heat *= mix(0.75, 1.1, smoothstep(-6.0, 5.0, p.y));\n    vec3 col = ember(clamp(heat, 0.0, 1.0));\n    for (int i = 0; i < 3; i++) {\n        float fi = float(i);\n        float t = fract(iPhase * (1.0 + fi) + hash(vec2(fi, 3.0)));\n        vec2 s = vec2(-4.0 + 8.0 * hash(vec2(fi, 8.0)) + 0.8 * sin(TAU * t * 2.0 + fi), mix(5.0, -8.0, t));\n        col = max(col, vec3(1.0, 0.55, 0.1) * (1.0 - t) * inside(length(p - s) - 0.35));\n    }\n    fragColor = vec4(col, 1.0);\n}\n"
+   }
+  }
+ ]
+}

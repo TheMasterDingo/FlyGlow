@@ -13,7 +13,26 @@ namespace fg {
 class Project : public QObject {
     Q_OBJECT
 public:
+    struct Snapshot {
+        QJsonObject scene;
+        int current = -1;
+    };
+    /** Everything one open scene owns; a tab parks its scene in one while another tab is active. */
+    struct Document {
+        Scene scene;
+        std::vector<Snapshot> undo, redo;
+        QString path;
+        bool modified = false;
+        int current = -1;
+    };
+
     explicit Project(QObject* parent = nullptr);
+
+    /**
+     * Exchanges the open scene, its undo history, path and modified flag with doc, then signals as after a load.
+     * An empty Document parks the current scene and leaves the project empty.
+     */
+    void swapDocument(Document& doc);
 
     Scene& scene() { return m_scene; }
     const Scene& scene() const { return m_scene; }
@@ -42,7 +61,7 @@ public:
     void notifyLayerChanged(int i);
     /** After layers are added, removed, reordered or get a new effect. */
     void notifyLayersChanged();
-    /** After scene-wide edits: loop length, brightness, gamma, dither. */
+    /** After scene-wide edits: loop length, brightness, gamma, dark lift. */
     void notifySettingsChanged();
     /** After layer names follow a UI language switch; does not mark the document modified. */
     void refreshLayerNames() { emit layersChanged(); }
@@ -63,10 +82,6 @@ signals:
     void undoStateChanged();
 
 private:
-    struct Snapshot {
-        QJsonObject scene;
-        int current = -1;
-    };
     Snapshot snapshot() const;
     void restore(const Snapshot& s);
     void setModified(bool m);

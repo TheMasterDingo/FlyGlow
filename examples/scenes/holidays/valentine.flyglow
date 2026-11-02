@@ -1,0 +1,62 @@
+{
+ "format": "flyglow",
+ "version": 1,
+ "preset": {
+  "title": {
+   "en": "Valentine",
+   "ru": "Валентинка"
+  },
+  "description": {
+   "en": "A red heart beating.",
+   "ru": "Красное сердце бьётся."
+  },
+  "controls": [
+   {
+    "type": "hue",
+    "label": {
+     "en": "Colour",
+     "ru": "Цвет"
+    },
+    "targets": [
+     {
+      "layer": 0
+     }
+    ],
+    "base": "#d90019"
+   }
+  ],
+  "cover": 0.02,
+  "tags": [
+   "heart",
+   "love",
+   "valentine",
+   "сердце",
+   "любовь"
+  ],
+  "order": 40
+ },
+ "loopSeconds": 3.0,
+ "brightness": 100,
+ "outputGamma": 1.4,
+ "layers": [
+  {
+   "name": "Heart",
+   "visible": true,
+   "opacity": 1.0,
+   "blend": 0,
+   "effect": {
+    "type": "shader",
+    "params": {
+     "speed": 1.0,
+     "seam": 0.0,
+     "brightness": 100.0,
+     "saturation": 100.0,
+     "zoom": 1.0,
+     "panX": 0.0,
+     "panY": -5.7
+    },
+    "source": "// A heart beating twice per loop, tip down like the dock.\n// Loops through iPhase: set \"Loop crossfade\" to 0.\n\nfloat dot2(vec2 v)\n{\n    return dot(v, v);\n}\n\n// Heart distance by Inigo Quilez (MIT).\nfloat sdHeart(vec2 p)\n{\n    p.x = abs(p.x);\n    if (p.y + p.x > 1.0)\n        return sqrt(dot2(p - vec2(0.25, 0.75))) - sqrt(2.0) / 4.0;\n    return sqrt(min(dot2(p - vec2(0.0, 1.0)), dot2(p - 0.5 * max(p.x + p.y, 0.0)))) * sign(p.x - p.y);\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec2 uv = (fragCoord - 0.5 * iResolution.xy) / iResolution.y;\n\n    // Lub-dub: a strong beat and a softer one right after it.\n    float f = fract(2.0 * iPhase);\n    float beat = exp(-60.0 * f * f) + 0.6 * exp(-60.0 * (f - 0.18) * (f - 0.18));\n\n    float scale = 0.55 * (1.0 + 0.1 * beat);\n    vec2 p = (uv - vec2(0.0, -0.32)) / scale;\n    float d = sdHeart(p);\n\n    // A filled heart in a triangular dock just looks like the dock, so the outline carries the shape.\n    vec3 col = d < 0.0 ? vec3(0.3, 0.0, 0.04) * (0.4 + 0.6 * beat) : vec3(0.0);\n    float edge = 1.0 - smoothstep(0.04, 0.11, abs(d));\n    col = mix(col, mix(vec3(0.85, 0.0, 0.1), vec3(1.0, 0.3, 0.45), beat), edge);\n    col += vec3(1.0, 0.05, 0.25) * exp(-20.0 * max(d, 0.0)) * 0.35 * beat * step(0.0, d);\n    fragColor = vec4(col, 1.0);\n}\n"
+   }
+  }
+ ]
+}

@@ -1,0 +1,84 @@
+{
+ "format": "flyglow",
+ "version": 1,
+ "preset": {
+  "title": {
+   "en": "Rain on the window",
+   "ru": "Дождь по стеклу"
+  },
+  "description": {
+   "en": "Rain on a window, city lights behind.",
+   "ru": "Дождь по стеклу, за ним огни города."
+  },
+  "controls": [
+   {
+    "type": "hue",
+    "label": {
+     "en": "Colour",
+     "ru": "Цвет"
+    },
+    "targets": [
+     {
+      "layer": 0
+     }
+    ],
+    "base": "#ff8c26"
+   },
+   {
+    "type": "number",
+    "label": {
+     "en": "Glow",
+     "ru": "Свечение"
+    },
+    "min": 0,
+    "max": 100,
+    "step": 1,
+    "suffix": "%",
+    "targets": [
+     {
+      "layer": 0,
+      "prop": "glow",
+      "from": 0,
+      "to": 1
+     }
+    ]
+   }
+  ],
+  "cover": 0.2,
+  "tags": [
+   "rain",
+   "window",
+   "night",
+   "city",
+   "дождь",
+   "окно",
+   "ночь",
+   "город"
+  ],
+  "order": 200
+ },
+ "loopSeconds": 6.0,
+ "brightness": 100,
+ "outputGamma": 1.4,
+ "layers": [
+  {
+   "name": "Rain",
+   "visible": true,
+   "opacity": 1.0,
+   "blend": 0,
+   "effect": {
+    "type": "shader",
+    "params": {
+     "speed": 1.0,
+     "seam": 0.0,
+     "brightness": 115.0,
+     "saturation": 100.0,
+     "zoom": 1.0,
+     "panX": 0.0,
+     "panY": 0.0
+    },
+    "source": "// Rain on a window at night: blurred city lights glow behind the glass, drops slide down it leaving trails.\n// Loops through iPhase: keep \"Loop crossfade\" at 0.\nconst float PI2 = 6.2831853;\nfloat h(vec2 p) { vec3 q = fract(vec3(p.xyx) * 0.1031); q += dot(q, q.yzx + 33.33); return fract((q.x + q.y) * q.z); }\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec2 p = fragCoord / iResolution.y;\n    float t = iPhase;\n    // Bokeh: soft warm and cool blobs, breathing.\n    vec3 col = vec3(0.02, 0.03, 0.08);\n    for (int k = 0; k < 7; k++) {\n        vec2 c = vec2(h(vec2(float(k), 1.0)) * 1.1, h(vec2(float(k), 2.0)) * 0.9 + 0.1);\n        float b = 0.6 + 0.4 * sin(PI2 * (t + h(vec2(float(k), 3.0))));\n        vec3 tint = mix(vec3(1.0, 0.55, 0.15), vec3(0.3, 0.6, 1.0), step(0.5, h(vec2(float(k), 4.0))));\n        col += tint * 0.6 * b * exp(-dot(p - c, p - c) / 0.014);\n    }\n    // Drops: columns, each with one drop sliding down once a loop at its own offset, and a faint trail above it.\n    float colx = floor(p.x * 9.0);\n    float off = h(vec2(colx, 7.0));\n    float y = 1.0 - fract(t + off);\n    float dx = fract(p.x * 9.0) - 0.5;\n    float d = abs(dx) < 0.22 ? 1.0 : 0.0;\n    float drop = d * smoothstep(0.05, 0.0, abs(p.y - y));\n    float trail = d * step(y, p.y) * exp(-(p.y - y) * 6.0) * 0.35;\n    col += vec3(0.75, 0.88, 1.0) * (drop + trail);\n    fragColor = vec4(col, 1.0);\n}\n"
+   }
+  }
+ ]
+}

@@ -51,6 +51,11 @@ public:
      */
     int moveKey(int index, double time);
     void setEasing(int index, Easing e);
+    /**
+     * Keeps only what plays between phases from and to (from < to) and stretches it over the whole loop: keys
+     * there are re-timed, and keys holding what showed at both ends are added.
+     */
+    void trim(double from, double to);
 
     void setLed(int key, int led, const Rgba& c);
     void fill(int key, const Rgba& c);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QJsonObject>
 #include <QWidget>
 
 class QComboBox;
@@ -11,6 +12,7 @@ class QToolButton;
 
 namespace fg {
 
+class ColorButton;
 class ParamPanel;
 class Project;
 class SliderRow;
@@ -34,8 +36,15 @@ private:
     void rebuildList();
     void refreshRow(int layerIndex);
     void syncCurrent();
+    /** The hint above the effect settings, for painted layers and filters. */
+    void syncEffectHint();
     int rowToLayer(int row) const;
     int layerToRow(int layer) const;
+    /**
+     * Offers a menu with "Show in preset settings…"; taking it asks for a name and appends control to the scene's
+     * preset controls (docs/presets.md).
+     */
+    void offerPresetControl(QJsonObject control, const QString& name, const QPoint& globalPos);
 
     Project* m_project;
     QLabel* m_layersTitle;
@@ -53,6 +62,34 @@ private:
     QComboBox* m_blend;
     QLabel* m_opacityLabel;
     SliderRow* m_opacity;
+    QLabel* m_colorLabel;
+    QLabel* m_hueLabel;
+    SliderRow* m_hue;
+    QLabel* m_satLabel;
+    SliderRow* m_saturation;
+    QLabel* m_lightLabel;
+    SliderRow* m_lightness;
+    QLabel* m_contrastLabel;
+    SliderRow* m_contrast;
+    QLabel* m_tintLabel;
+    ColorButton* m_tint;
+    QToolButton* m_tintReset;
+    QWidget* m_detailBox;
+    QLabel* m_glowTitle;
+    QLabel* m_glowLabel;
+    SliderRow* m_glow;
+    QLabel* m_glowSizeLabel;
+    SliderRow* m_glowSize;
+    QLabel* m_blurLabel;
+    SliderRow* m_blur;
+    QLabel* m_sharpenLabel;
+    SliderRow* m_sharpen;
+    QWidget* m_timeBox;
+    QLabel* m_timeTitle;
+    QLabel* m_speedLabel;
+    SliderRow* m_speed;
+    QLabel* m_offsetLabel;
+    SliderRow* m_offset;
     QLabel* m_maskLabel;
     QToolButton* m_maskPaint;
     QToolButton* m_maskClear;

@@ -1,0 +1,83 @@
+{
+ "format": "flyglow",
+ "version": 1,
+ "preset": {
+  "title": {
+   "en": "Lava",
+   "ru": "Лава"
+  },
+  "description": {
+   "en": "Lava glowing through cracks in dark rock.",
+   "ru": "Лава светится в трещинах тёмной породы."
+  },
+  "controls": [
+   {
+    "type": "hue",
+    "label": {
+     "en": "Colour",
+     "ru": "Цвет"
+    },
+    "targets": [
+     {
+      "layer": 0
+     }
+    ],
+    "base": "#ff5a05"
+   },
+   {
+    "type": "number",
+    "label": {
+     "en": "Glow",
+     "ru": "Свечение"
+    },
+    "min": 0,
+    "max": 100,
+    "step": 1,
+    "suffix": "%",
+    "targets": [
+     {
+      "layer": 0,
+      "prop": "glow",
+      "from": 0,
+      "to": 1
+     }
+    ]
+   }
+  ],
+  "cover": 0.2,
+  "tags": [
+   "lava",
+   "volcano",
+   "magma",
+   "fire",
+   "лава",
+   "вулкан",
+   "магма"
+  ],
+  "order": 230
+ },
+ "loopSeconds": 8.0,
+ "brightness": 100,
+ "outputGamma": 1.4,
+ "layers": [
+  {
+   "name": "Lava",
+   "visible": true,
+   "opacity": 1.0,
+   "blend": 0,
+   "effect": {
+    "type": "shader",
+    "params": {
+     "speed": 1.0,
+     "seam": 0.0,
+     "brightness": 110.0,
+     "saturation": 100.0,
+     "zoom": 1.0,
+     "panX": 0.0,
+     "panY": 0.0
+    },
+    "source": "// Lava: dark plates of cooled rock with glowing cracks between them; the glow pulses and creeps along the cracks.\n// Loops through iPhase: keep \"Loop crossfade\" at 0.\nconst float PI2 = 6.2831853;\nvec2 h2(vec2 p) { vec3 q = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973)); q += dot(q, q.yzx + 33.33);\n                  return fract((q.xx + q.yz) * q.zy); }\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec2 p = fragCoord / iResolution.y * 4.0;\n    float t = iPhase;\n    // Voronoi: distance to the border between cells is the crack.\n    vec2 i = floor(p), f = fract(p);\n    float d1 = 8.0, d2 = 8.0;\n    for (int y = -1; y <= 1; y++)\n        for (int x = -1; x <= 1; x++) {\n            vec2 g = vec2(x, y);\n            vec2 o = h2(i + g);\n            o = 0.5 + 0.35 * sin(PI2 * (t + o));\n            float d = length(g + o - f);\n            if (d < d1) { d2 = d1; d1 = d; } else if (d < d2) d2 = d;\n        }\n    float crack = smoothstep(0.18, 0.0, d2 - d1);\n    float pulse = 0.7 + 0.3 * sin(PI2 * (2.0 * t + p.x * 0.3));\n    vec3 col = mix(vec3(0.10, 0.04, 0.03), vec3(1.0, 0.35, 0.02), crack * pulse);\n    col += vec3(1.0, 0.8, 0.3) * pow(crack, 4.0) * pulse;\n    fragColor = vec4(col, 1.0);\n}\n"
+   }
+  }
+ ]
+}

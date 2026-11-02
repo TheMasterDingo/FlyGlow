@@ -21,6 +21,11 @@ CMakeUserPresets.json
 __pycache__/
 *.pyc
 
+# Local tools, not part of the app: Python scripts (preset generators, the preset index writer, IPC probes) and logs
+*.py
+/tools/scenegen/
+*.log
+
 /ref/
 /promo/
 /docs/social-preview.png

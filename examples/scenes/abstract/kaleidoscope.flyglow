@@ -1,0 +1,61 @@
+{
+ "format": "flyglow",
+ "version": 1,
+ "preset": {
+  "title": {
+   "en": "Kaleidoscope",
+   "ru": "Калейдоскоп"
+  },
+  "description": {
+   "en": "Rainbow kaleidoscope with three-fold symmetry, slowly turning.",
+   "ru": "Радужный калейдоскоп с тройной симметрией, медленно вращается."
+  },
+  "controls": [
+   {
+    "type": "hue",
+    "label": {
+     "en": "Colour",
+     "ru": "Цвет"
+    },
+    "targets": [
+     {
+      "layer": 0
+     }
+    ],
+    "base": "#ff2020"
+   }
+  ],
+  "cover": 0.2,
+  "tags": [
+   "kaleidoscope",
+   "rainbow",
+   "symmetry",
+   "калейдоскоп"
+  ],
+  "order": 10
+ },
+ "loopSeconds": 10.0,
+ "brightness": 100,
+ "outputGamma": 1.4,
+ "layers": [
+  {
+   "name": "Kaleidoscope",
+   "visible": true,
+   "opacity": 1.0,
+   "blend": 0,
+   "effect": {
+    "type": "shader",
+    "params": {
+     "speed": 1.0,
+     "seam": 0.0,
+     "brightness": 100.0,
+     "saturation": 100.0,
+     "zoom": 1.0,
+     "panX": 0.0,
+     "panY": 0.0
+    },
+    "source": "// Kaleidoscope with the dock's own three-fold symmetry, centred on the LEDs.\n// Loops through iPhase: set \"Loop crossfade\" to 0.\n\nconst float TAU = 6.2831853;\n\nvec3 palette(float x)\n{\n    return 0.5 + 0.5 * cos(TAU * (x + vec3(0.0, 0.33, 0.67)));\n}\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec2 uv = (fragCoord - 0.5 * iResolution.xy) / iResolution.y - vec2(0.0, 0.11);\n    float t = TAU * iPhase;\n\n    // A third of a turn per loop looks the same as no turn at all.\n    float sector = TAU / 3.0;\n    float a = mod(atan(uv.y, uv.x) + t / 3.0, sector);\n    a = abs(a - 0.5 * sector);\n    float r = length(uv);\n    vec2 p = r * vec2(cos(a), sin(a));\n\n    float v = sin(11.0 * p.x - 2.0 * t) + sin(13.0 * p.y + t) + sin(9.0 * r - 3.0 * t);\n    vec3 col = palette(0.12 * v + 0.8 * r - iPhase);\n    col = pow(col, vec3(1.6));\n    fragColor = vec4(col, 1.0);\n}\n"
+   }
+  }
+ ]
+}

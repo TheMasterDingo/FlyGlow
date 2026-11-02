@@ -1,0 +1,76 @@
+{
+ "format": "flyglow",
+ "version": 1,
+ "preset": {
+  "title": {
+   "en": "Moon path",
+   "ru": "Лунная дорожка"
+  },
+  "description": {
+   "en": "A full moon over the sea, its light glittering on the water.",
+   "ru": "Полная луна над морем, на воде блестит лунная дорожка."
+  },
+  "controls": [
+   {
+    "type": "hue",
+    "label": {
+     "en": "Colour",
+     "ru": "Цвет"
+    },
+    "targets": [
+     {
+      "layer": 0
+     }
+    ],
+    "base": "#0d1a61"
+   },
+   {
+    "type": "opacity",
+    "label": {
+     "en": "Brightness",
+     "ru": "Яркость"
+    },
+    "targets": [
+     {
+      "layer": 0
+     }
+    ]
+   }
+  ],
+  "cover": 0.0,
+  "tags": [
+   "moon",
+   "sea",
+   "night",
+   "calm",
+   "луна",
+   "море",
+   "ночь"
+  ],
+  "order": 270
+ },
+ "loopSeconds": 16.0,
+ "brightness": 100,
+ "outputGamma": 1.4,
+ "layers": [
+  {
+   "name": "Moon",
+   "visible": true,
+   "opacity": 1.0,
+   "blend": 0,
+   "effect": {
+    "type": "shader",
+    "params": {
+     "speed": 1.0,
+     "seam": 0.0,
+     "brightness": 100.0,
+     "saturation": 100.0,
+     "zoom": 1.0,
+     "panX": 0.0,
+     "panY": 0.0
+    },
+    "source": "// Moon path: a full moon low over a dark sea, a few stars twinkling round it, and below the horizon a road\n// of moonlight on the water that widens toward the tip and glitters as the swell moves. The glitter is noise read\n// along a circle through time, so the loop closes. Loops through iPhase: keep \"Loop crossfade\" at 0.\n\nconst float TAU = 6.2831853;\n// The middle of the dock's rounded triangle, about equally far from its three corners.\nconst vec2 MID = vec2(0.0, -1.6);\n\n// Dock layout units: one LED pitch = 1, x to the right, y down, 0 at the centre of the LEDs.\n// The frame spans the dock outline's bounding box: 17.82 x 16.17 units, centred at (-0.018, 0.220).\nvec2 dockPos(vec2 fragCoord)\n{\n    return (fragCoord / iResolution.xy - 0.5) * vec2(17.82, -16.17) + vec2(-0.018, 0.220);\n}\n\n// Centre of the LED nearest to p, so every LED gets one crisp colour; .z = row 0..15 from the top.\nvec3 ledCell(vec2 p)\n{\n    float r0 = floor((p.y + 6.477) / 0.8636 + 0.5);\n    vec3 best = vec3(0.0);\n    float bestD = 1e9;\n    for (int k = -1; k <= 1; k++) {\n        float row = clamp(r0 + float(k), 0.0, 15.0);\n        float n = row <= 2.0 ? 14.0 + row : 18.0 - row;\n        float off = mod(n, 2.0) == 0.0 ? 0.5 : 0.0;\n        float x = clamp(floor(p.x - off + 0.5) + off, -0.5 * (n - 1.0), 0.5 * (n - 1.0));\n        vec2 c = vec2(x, -6.477 + row * 0.8636);\n        float d = dot(p - c, p - c);\n        if (d < bestD) {\n            bestD = d;\n            best = vec3(c, row);\n        }\n    }\n    return best;\n}\n\n// 1 inside a disc around the LED centre, 0 on the cell border: FlyGlow averages each LED's whole cell, and\n// light on the border would leak into the neighbours. Keeps about 2/3 of the light; brightness 120% evens it out.\nfloat ledCore(vec2 p, vec3 led)\n{\n    return step(length(p - led.xy), 0.46);\n}\n\n// Hashes without sine (Dave Hoskins): uncorrelated between neighbouring integers on every GPU.\nfloat hash(vec2 p)\n{\n    vec3 p3 = fract(vec3(p.xyx) * 0.1031);\n    p3 += dot(p3, p3.yzx + 33.33);\n    return fract((p3.x + p3.y) * p3.z);\n}\n\nfloat hash13(vec3 p3)\n{\n    p3 = fract(p3 * 0.1031);\n    p3 += dot(p3, p3.zyx + 31.32);\n    return fract((p3.x + p3.y) * p3.z);\n}\n\nfloat noise3(vec3 p)\n{\n    vec3 i = floor(p);\n    vec3 f = fract(p);\n    f = f * f * (3.0 - 2.0 * f);\n    float a = mix(mix(hash13(i), hash13(i + vec3(1, 0, 0)), f.x),\n                  mix(hash13(i + vec3(0, 1, 0)), hash13(i + vec3(1, 1, 0)), f.x), f.y);\n    float b = mix(mix(hash13(i + vec3(0, 0, 1)), hash13(i + vec3(1, 0, 1)), f.x),\n                  mix(hash13(i + vec3(0, 1, 1)), hash13(i + vec3(1, 1, 1)), f.x), f.y);\n    return mix(a, b, f.z);\n}\n\nfloat fbm3(vec3 p) { return 0.6 * noise3(p) + 0.3 * noise3(p * 2.1 + 5.0) + 0.1 * noise3(p * 4.3 + 9.0); }\n\n// 1 inside, 0 outside a shape given its signed distance in LED pitches, with a half-LED ramp across the edge,\n// so moving edges glide between LEDs without a wide muddy fringe.\nfloat inside(float sd) { return clamp(0.5 - 2.0 * sd, 0.0, 1.0); }\n\nconst float HORIZON = -1.2;\nconst vec2 MOON = vec2(0.0, -4.0);\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord)\n{\n    vec2 p = dockPos(fragCoord);\n    float T = TAU * iPhase;\n    vec3 col;\n    if (p.y < HORIZON) {\n        float h = clamp((p.y + 6.5) / (HORIZON + 6.5), 0.0, 1.0);          // 0 at the top, 1 at the horizon\n        col = mix(vec3(0.0, 0.02, 0.16), vec3(0.05, 0.1, 0.38), h);\n        float r = length(p - MOON);\n        col += vec3(0.2, 0.26, 0.5) * exp(-r * r / 5.0);                    // the halo\n        col = mix(col, vec3(1.0, 0.96, 0.82), smoothstep(1.8, 1.4, r));     // the disc\n        vec3 led = ledCell(p);\n        float s = hash(led.xy * 3.1 + 7.0);\n        if (s > 0.86 && length(led.xy - MOON) > 2.6) {\n            float tw = 0.5 + 0.5 * sin(T * (1.0 + floor(3.0 * hash(led.xy + 1.7))) + 6.0 * s);\n            col += vec3(0.7, 0.75, 0.9) * tw * ledCore(p, led);\n        }\n    } else {\n        float d = p.y - HORIZON;                                            // how far below the horizon\n        col = vec3(0.0, 0.03, 0.2) * (0.6 + 0.4 * exp(-d / 3.0));\n        float swell = 0.5 + 0.5 * sin(2.4 * p.y - 2.0 * T + 0.8 * sin(0.7 * p.x + T));\n        col += vec3(0.0, 0.06, 0.22) * swell;\n        // The road of light: narrow at the horizon, wider near the tip, broken into glitter by the swell.\n        float w = 0.7 + 0.32 * d;\n        float road = exp(-(p.x / w) * (p.x / w));\n        vec3 q = vec3(1.4 * p.x, 2.6 * p.y, 0.0) + 1.6 * vec3(cos(2.0 * T), sin(2.0 * T), 0.0);\n        float glitter = smoothstep(0.5, 0.8, noise3(q));\n        col += vec3(1.0, 0.95, 0.75) * road * (0.18 + 0.25 * swell + 0.9 * glitter);\n    }\n    fragColor = vec4(min(col, vec3(1.0)), 1.0);\n}\n"
+   }
+  }
+ ]
+}

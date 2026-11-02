@@ -150,11 +150,11 @@ QTransform layoutToView(const LedLayout& layout, const QSize& source, const Fram
     return t;
 }
 
-LedSampler::LedSampler(const LedLayout& layout) : m_layout(layout)
+LedSampler::LedSampler(const LedLayout& layout, double reach) : m_layout(layout), m_step(kPatternStep * reach)
 {
     // A 19-point hex patch turned 30° against the LED lattice keeps its outer ring inside the LED's own cell.
-    const QPointF e1(kPatternStep * std::sqrt(3.0) / 2.0, kPatternStep * 0.5);
-    const QPointF e2(0, kPatternStep);
+    const QPointF e1(m_step * std::sqrt(3.0) / 2.0, m_step * 0.5);
+    const QPointF e2(0, m_step);
     for (int q = -2; q <= 2; ++q)
         for (int r = -2; r <= 2; ++r)
             if (std::abs(q + r) <= 2)
@@ -173,7 +173,7 @@ void LedSampler::sample(const QImage& frame, const Framing& framing, const Adjus
                                 * sourceToView(img.size(), framing).inverted();
     const double pixelsPerUnit = std::sqrt(std::abs(toSource.determinant()));
     // Pre-average k x k blocks so neighbouring sample points' bilinear footprints touch.
-    const int k = std::max(1, int(kPatternStep * pixelsPerUnit * 0.5));
+    const int k = std::max(1, int(m_step * pixelsPerUnit * 0.5));
     const QRect reach = toSource.mapRect(m_layout.bounds().adjusted(-1, -1, 1, 1)).toAlignedRect();
     const QRect region = reach.adjusted(-2 * k, -2 * k, 2 * k, 2 * k) & img.rect();
     if (region.isEmpty())

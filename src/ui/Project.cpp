@@ -16,6 +16,21 @@ constexpr size_t kUndoLimit = 200;
 
 Project::Project(QObject* parent) : QObject(parent) {}
 
+void Project::swapDocument(Document& doc)
+{
+    std::swap(m_scene, doc.scene);
+    std::swap(m_undo, doc.undo);
+    std::swap(m_redo, doc.redo);
+    std::swap(m_path, doc.path);
+    std::swap(m_current, doc.current);
+    std::swap(m_modified, doc.modified);
+    emit layersChanged();
+    emit settingsChanged();
+    emit currentChanged(m_current);
+    emit undoStateChanged();
+    emit modifiedChanged(m_modified);
+}
+
 void Project::setCurrentIndex(int i)
 {
     i = layerCount() == 0 ? -1 : std::clamp(i, 0, layerCount() - 1);
@@ -221,7 +236,8 @@ void Project::newDefault()
     m_scene.loopSeconds = 6.0;
     m_scene.brightness = 100;
     m_scene.outputGamma = kDockGamma;
-    m_scene.dither = false;
+    m_scene.darkLift = 0.0;
+    m_scene.preset = QJsonObject();
     const auto& entries = EffectRegistry::instance().entries();
     QString base = "aurora";
     if (!EffectRegistry::instance().create(base))

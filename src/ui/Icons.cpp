@@ -227,6 +227,13 @@ void draw(QPainter& p, Id id, const QColor& c)
         p.drawPolyline(QPolygonF({QPointF(15.5, 7.5), QPointF(20, 12), QPointF(15.5, 16.5)}));
         p.drawLine(QPointF(13.5, 5.5), QPointF(10.5, 18.5));
         break;
+    case Id::Presets:
+        p.drawRoundedRect(QRectF(4.5, 4.5, 6.5, 6.5), 1.5, 1.5);
+        p.drawRoundedRect(QRectF(13, 4.5, 6.5, 6.5), 1.5, 1.5);
+        p.drawRoundedRect(QRectF(4.5, 13, 6.5, 6.5), 1.5, 1.5);
+        p.setBrush(c);
+        p.drawRoundedRect(QRectF(13, 13, 6.5, 6.5), 1.5, 1.5);
+        break;
     }
 }
 

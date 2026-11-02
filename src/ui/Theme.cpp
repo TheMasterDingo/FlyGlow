@@ -69,12 +69,28 @@ QPushButton#Primary:disabled { background: #1d2230; color: #4f5666; }
 QToolButton#Flat, QPushButton#Flat { background: transparent; border: 1px solid transparent; }
 QToolButton#Flat:hover, QPushButton#Flat:hover { background: %CARD%; border-color: %BORDER%; }
 QToolButton#Flat:checked { background: rgba(57,208,255,0.16); border-color: %ACCENT%; }
+QToolButton#Update {
+    border-radius: 12px; padding: 3px 12px; border: none; color: #061018; font-weight: 700;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 %ACCENT%, stop:1 %ACCENT2%);
+}
+QToolButton#Chip { border-radius: 12px; padding: 3px 11px; color: %DIM%; }
+QToolButton#Chip:checked { color: %TEXT%; background: rgba(57,208,255,0.16); border-color: %ACCENT%; }
+QTabBar#SceneTabs { background: transparent; }
+QTabBar#SceneTabs::tab {
+    background: transparent; color: %DIM%; border: 1px solid transparent; border-radius: 8px;
+    padding: 5px 0 5px 12px; margin-right: 4px; min-width: 70px; max-width: 220px;
+}
+QTabBar#SceneTabs::tab:hover { background: %CARD%; color: %TEXT%; }
+QTabBar#SceneTabs::tab:selected { background: %CARD%; color: %TEXT%; border-color: %BORDER%; }
+QTabBar#SceneTabs QToolButton { background: %PANEL%; border: none; border-radius: 5px; }
+QTabBar#SceneTabs QToolButton#TabClose { background: transparent; border: none; border-radius: 4px; padding: 0; }
+QTabBar#SceneTabs QToolButton#TabClose:hover { background: %HOVER%; }
 
-QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox {
+QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox, QPlainTextEdit {
     background: %CARD%; border: 1px solid %BORDER%; border-radius: 7px; padding: 4px 8px;
     selection-background-color: %ACCENT%; selection-color: #061018;
 }
-QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus { border-color: %ACCENT%; }
+QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus, QPlainTextEdit:focus { border-color: %ACCENT%; }
 QSpinBox::up-button, QSpinBox::down-button, QDoubleSpinBox::up-button, QDoubleSpinBox::down-button { width: 0; border: none; }
 QComboBox::drop-down { border: none; width: 26px; }
 QComboBox::down-arrow { image: url(:/ui/chevron-down.svg); width: 12px; height: 12px; }
@@ -86,8 +102,9 @@ QSlider::handle:horizontal { background: %TEXT%; width: 14px; height: 14px; marg
 QSlider::handle:horizontal:hover { background: #ffffff; }
 
 QCheckBox { spacing: 8px; }
-QCheckBox::indicator { width: 34px; height: 18px; border-radius: 9px; background: #262a35; border: 1px solid %BORDER%; image: none; }
-QCheckBox::indicator:checked { background: %ACCENT%; border-color: %ACCENT%; }
+QCheckBox::indicator { width: 16px; height: 16px; border-radius: 4px; background: %CARD%; border: 1px solid #3a4150; image: none; }
+QCheckBox::indicator:hover { border-color: %ACCENT%; }
+QCheckBox::indicator:checked { background: %ACCENT%; border-color: %ACCENT%; image: url(:/ui/check.svg); }
 
 QListWidget, QTreeWidget { background: transparent; border: none; outline: none; }
 QListWidget::item, QTreeWidget::item { border-radius: 8px; padding: 6px; margin: 1px 0; }

@@ -1,0 +1,285 @@
+{
+ "format": "flyglow",
+ "version": 1,
+ "preset": {
+  "title": {
+   "en": "Dota 2",
+   "ru": "Dota 2"
+  },
+  "description": {
+   "en": "The red Dota 2 logo with a glint.",
+   "ru": "Красный логотип Dota 2 с бликом."
+  },
+  "controls": [
+   {
+    "type": "color",
+    "label": {
+     "en": "Colour",
+     "ru": "Цвет"
+    },
+    "targets": [
+     {
+      "layer": 0,
+      "swap": 0
+     }
+    ]
+   },
+   {
+    "type": "toggle",
+    "label": {
+     "en": "Glint",
+     "ru": "Блик"
+    },
+    "targets": [
+     {
+      "layer": 1
+     }
+    ]
+   },
+   {
+    "type": "number",
+    "label": {
+     "en": "Glow",
+     "ru": "Свечение"
+    },
+    "min": 0,
+    "max": 100,
+    "step": 1,
+    "suffix": "%",
+    "targets": [
+     {
+      "layer": 0,
+      "prop": "glow",
+      "from": 0,
+      "to": 1
+     }
+    ]
+   }
+  ],
+  "group": "Valve",
+  "cover": 0.2,
+  "tags": [
+   "dota 2",
+   "dota",
+   "valve",
+   "moba",
+   "esports",
+   "дота",
+   "киберспорт"
+  ],
+  "order": 107
+ },
+ "loopSeconds": 5.0,
+ "brightness": 100,
+ "outputGamma": 1.4,
+ "layers": [
+  {
+   "name": "Dota 2",
+   "visible": true,
+   "opacity": 1.0,
+   "blend": 0,
+   "effect": {
+    "type": "keyframes",
+    "params": {},
+    "keys": [
+     {
+      "time": 0.0,
+      "easing": 2,
+      "colors": [
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "9a2315ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "b0291aff",
+       "b0291aff",
+       "9d2416ff",
+       "b0291aff",
+       "b0291aff",
+       "972215ff",
+       "b0291aff",
+       "b0291aff",
+       "b0291aff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "9a2315ff",
+       "b0291aff",
+       "b0291aff",
+       "b0291aff",
+       "b0291aff",
+       "b0291aff",
+       "b0291aff",
+       "000000ff",
+       "ad2819ff",
+       "9a2315ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "b0291aff",
+       "801b10ff",
+       "801b10ff",
+       "b0291aff",
+       "b0291aff",
+       "b0291aff",
+       "000000ff",
+       "000000ff",
+       "b0291aff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "9a2315ff",
+       "b0291aff",
+       "9d2416ff",
+       "000000ff",
+       "912013ff",
+       "b0291aff",
+       "b0291aff",
+       "b0291aff",
+       "b0291aff",
+       "78190eff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "b0291aff",
+       "b0291aff",
+       "b0291aff",
+       "000000ff",
+       "000000ff",
+       "a32517ff",
+       "b0291aff",
+       "b0291aff",
+       "b0291aff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "972215ff",
+       "b0291aff",
+       "b0291aff",
+       "b0291aff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "b0291aff",
+       "b0291aff",
+       "70160dff",
+       "000000ff",
+       "000000ff",
+       "b0291aff",
+       "9a2315ff",
+       "b0291aff",
+       "b0291aff",
+       "74180dff",
+       "000000ff",
+       "000000ff",
+       "7c1a0fff",
+       "b0291aff",
+       "000000ff",
+       "9a2315ff",
+       "8b1e12ff",
+       "000000ff",
+       "b0291aff",
+       "b0291aff",
+       "942114ff",
+       "000000ff",
+       "000000ff",
+       "ad2819ff",
+       "b0291aff",
+       "b0291aff",
+       "000000ff",
+       "000000ff",
+       "b0291aff",
+       "b0291aff",
+       "ab2719ff",
+       "62120aff",
+       "78190eff",
+       "b0291aff",
+       "b0291aff",
+       "b0291aff",
+       "b0291aff",
+       "b0291aff",
+       "b0291aff",
+       "b0291aff",
+       "b0291aff",
+       "b0291aff",
+       "942114ff",
+       "942114ff",
+       "8b1e12ff",
+       "801b10ff",
+       "942114ff",
+       "912013ff",
+       "70160dff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff",
+       "000000ff"
+      ]
+     }
+    ]
+   },
+   "swaps": [
+    {
+     "from": "#b0291a",
+     "to": "#b0291a",
+     "range": 30
+    }
+   ],
+   "glow": 0.15,
+   "glowSize": 1.5
+  },
+  {
+   "name": "Glint",
+   "visible": true,
+   "opacity": 1.0,
+   "blend": 0,
+   "effect": {
+    "type": "glint",
+    "params": {
+     "angle": 45.0,
+     "width": 1.8,
+     "strength": 80.0,
+     "passes": 1,
+     "sweep": 55.0,
+     "color": "#ffffff",
+     "whiteness": 30.0,
+     "dark": 0.0
+    }
+   }
+  }
+ ]
+}

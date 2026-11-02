@@ -47,9 +47,41 @@ void Timeline::setKeys(const QVector<double>& times, int selected)
     update();
 }
 
+void Timeline::clearSelection()
+{
+    if (!hasSelection())
+        return;
+    m_selFrom = m_selTo = 0;
+    update();
+    emit selectionChanged();
+}
+
 QRectF Timeline::track() const
 {
     return QRectF(14, 6, width() - 28, height() - 12);
+}
+
+int Timeline::selectionEdgeAt(const QPointF& p) const
+{
+    if (!hasSelection() || !track().adjusted(-6, 0, 6, 0).contains(p))
+        return 0;
+    if (std::abs(p.x() - phaseToX(m_selFrom)) <= 5)
+        return -1;
+    if (std::abs(p.x() - phaseToX(m_selTo)) <= 5)
+        return 1;
+    return 0;
+}
+
+double Timeline::snapped(double phase, Qt::KeyboardModifiers mods) const
+{
+    phase = std::clamp(phase, 0.0, 1.0);
+    if (mods & Qt::AltModifier)
+        return phase;
+    // Keys pull within a few pixels, otherwise hundredths of the loop, like dragged keys.
+    for (double k : m_keys)
+        if (std::abs(phaseToX(k) - phaseToX(phase)) <= 6)
+            return k;
+    return std::round(phase * 100.0) / 100.0;
 }
 
 double Timeline::xToPhase(double x) const
@@ -94,6 +126,28 @@ void Timeline::paintEvent(QPaintEvent*)
     QFont f = font();
     f.setPointSizeF(8);
     p.setFont(f);
+
+    // The ruler, where the playhead is dragged, set off from the frames below it.
+    p.setPen(QPen(QColor(0x2a, 0x2f, 0x3a), 1));
+    p.drawLine(QPointF(t.left() + 8, t.top() + kRulerHeight), QPointF(t.right() - 8, t.top() + kRulerHeight));
+
+    if (hasSelection()) {
+        const double x0 = phaseToX(m_selFrom), x1 = phaseToX(m_selTo);
+        QColor band = theme::kAccent;
+        band.setAlpha(46);
+        p.setPen(Qt::NoPen);
+        p.setBrush(band);
+        p.drawRect(QRectF(QPointF(x0, t.top()), QPointF(x1, t.bottom())));
+        p.setPen(QPen(theme::kAccent, 1.5));
+        p.drawLine(QPointF(x0, t.top()), QPointF(x0, t.bottom()));
+        p.drawLine(QPointF(x1, t.top()), QPointF(x1, t.bottom()));
+        const QString len = tr("%1 s").arg(QLocale().toString((m_selTo - m_selFrom) * m_loopSeconds, 'f', 2));
+        const double w = p.fontMetrics().horizontalAdvance(len) + 8;
+        if (x1 - x0 > w) {
+            p.setPen(theme::kText);
+            p.drawText(QRectF(x1 - w, t.bottom() - 16, w, 14), Qt::AlignCenter, len);
+        }
+    }
     const double pxPerSec = t.width() / m_loopSeconds;
     double minor = 0.1;
     while (minor * pxPerSec < 8)
@@ -150,11 +204,26 @@ void Timeline::mousePressEvent(QMouseEvent* e)
         if (k >= 0) {
             emit keySelected(k);
             emit keyContextMenu(k, e->globalPosition().toPoint());
+        } else {
+            emit contextMenuRequested(xToPhase(e->position().x()), e->globalPosition().toPoint());
         }
         return;
     }
     if (e->button() != Qt::LeftButton)
         return;
+    const double x = e->position().x();
+    // The ruler with the ticks along the top moves the playhead; everything below picks frames and ranges.
+    if (onRuler(e->position())) {
+        m_drag = Drag::Scrub;
+        emit scrubStarted();
+        emit phaseScrubbed(xToPhase(x));
+        return;
+    }
+    if (const int edge = selectionEdgeAt(e->position())) {
+        m_drag = Drag::Select;
+        m_selAnchor = edge < 0 ? m_selTo : m_selFrom;
+        return;
+    }
     if (k >= 0) {
         m_drag = Drag::Key;
         m_dragKey = k;
@@ -162,9 +231,15 @@ void Timeline::mousePressEvent(QMouseEvent* e)
         emit keyDragStarted(k);
         return;
     }
-    m_drag = Drag::Scrub;
-    emit scrubStarted();
-    emit phaseScrubbed(xToPhase(e->position().x()));
+    m_drag = Drag::Select;
+    m_selAnchor = snapped((x - track().left()) / track().width(), e->modifiers());
+    m_selFrom = m_selTo = m_selAnchor;
+    update();
+}
+
+bool Timeline::onRuler(const QPointF& p) const
+{
+    return p.y() < track().top() + kRulerHeight;
 }
 
 void Timeline::mouseMoveEvent(QMouseEvent* e)
@@ -176,15 +251,32 @@ void Timeline::mouseMoveEvent(QMouseEvent* e)
         if (!(e->modifiers() & Qt::AltModifier))
             ph = std::round(ph * 100.0) / 100.0;
         emit keyMoved(m_dragKey, std::min(ph, 0.999));
+    } else if (m_drag == Drag::Select) {
+        const double ph = snapped((e->position().x() - track().left()) / track().width(), e->modifiers());
+        m_selFrom = std::min(m_selAnchor, ph);
+        m_selTo = std::max(m_selAnchor, ph);
+        update();
+        emit selectionChanged();
+    } else if (onRuler(e->position())) {
+        setCursor(Qt::PointingHandCursor);
     } else {
-        setCursor(keyAtPos(e->position()) >= 0 ? Qt::SizeHorCursor : Qt::ArrowCursor);
+        const bool edge = selectionEdgeAt(e->position()) != 0 || keyAtPos(e->position()) >= 0;
+        setCursor(edge ? Qt::SizeHorCursor : Qt::IBeamCursor);
     }
 }
 
-void Timeline::mouseReleaseEvent(QMouseEvent*)
+void Timeline::mouseReleaseEvent(QMouseEvent* e)
 {
     if (m_drag == Drag::Key)
         emit keyDragFinished();
+    if (m_drag == Drag::Select && m_selTo - m_selFrom < 0.005) {
+        // A click without dragging picks that frame: the selection goes and the playhead moves there.
+        m_selFrom = m_selTo = 0;
+        update();
+        emit selectionChanged();
+        emit scrubStarted();
+        emit phaseScrubbed(xToPhase(e->position().x()));
+    }
     m_drag = Drag::None;
     m_dragKey = -1;
 }

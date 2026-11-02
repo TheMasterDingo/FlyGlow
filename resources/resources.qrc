@@ -1,16 +1,22 @@
 <RCC>
     <qresource prefix="/ui">
+        <file>check.svg</file>
         <file>chevron-down.svg</file>
+        <file>close.svg</file>
         <file>flyglow.svg</file>
         <file>flyglow-256.png</file>
         <file>flyglow.ico</file>
     </qresource>
     <qresource prefix="/shaders">
-        <file alias="kaleidoscope.glsl">../examples/shaders/kaleidoscope.glsl</file>
-        <file alias="heartbeat.glsl">../examples/shaders/heartbeat.glsl</file>
-        <file alias="lava-lamp.glsl">../examples/shaders/lava-lamp.glsl</file>
-        <file alias="warp-stars.glsl">../examples/shaders/warp-stars.glsl</file>
-        <file alias="synthwave.glsl">../examples/shaders/synthwave.glsl</file>
-        <file alias="pacman.glsl">../examples/shaders/pacman.glsl</file>
+        <file alias="template.glsl">../examples/shaders/template.glsl</file>
+        <file alias="gradient-sweep.glsl">../examples/shaders/gradient-sweep.glsl</file>
+        <file alias="stripes.glsl">../examples/shaders/stripes.glsl</file>
+        <file alias="plasma.glsl">../examples/shaders/plasma.glsl</file>
+        <file alias="noise-flow.glsl">../examples/shaders/noise-flow.glsl</file>
+        <file alias="pinwheel.glsl">../examples/shaders/pinwheel.glsl</file>
+        <file alias="glowing-shape.glsl">../examples/shaders/glowing-shape.glsl</file>
+        <file alias="particles.glsl">../examples/shaders/particles.glsl</file>
+        <file alias="led-pixels.glsl">../examples/shaders/led-pixels.glsl</file>
+        <file alias="filter.glsl">../examples/shaders/filter.glsl</file>
     </qresource>
 </RCC>

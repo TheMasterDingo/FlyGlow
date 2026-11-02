@@ -5,6 +5,7 @@
 #include <QList>
 #include <QString>
 #include <memory>
+#include <vector>
 
 class QOffscreenSurface;
 class QOpenGLContext;
@@ -16,6 +17,11 @@ struct ShaderTime {
     double time = 0;    /**< iTime, seconds */
     double phase = 0;   /**< iPhase, [0, 1) through the loop */
     double loop = 4;    /**< iLoop, loop length in seconds */
+};
+
+/** A picture for iChannel0, frameSize() pixels, sRGB values 0..1 as RGBA floats in GL order (bottom row first). */
+struct ShaderInput {
+    std::vector<float> rgba;
 };
 
 struct ShaderIssue {
@@ -48,8 +54,11 @@ public:
     bool isAvailable();
     /** Results are cached by source text. */
     ShaderCompileResult compile(const QString& source);
-    /** sRGB pixels, or a null image when the source does not compile. */
-    QImage render(const QString& source, const ShaderTime& t);
+    /**
+     * sRGB pixels, or a null image when the source does not compile.
+     * @param input Bound to iChannel0 with linear filtering; nullptr leaves every channel black.
+     */
+    QImage render(const QString& source, const ShaderTime& t, const ShaderInput* input = nullptr);
 
 private:
     struct Program;
@@ -64,6 +73,7 @@ private:
     unsigned m_fbo = 0;
     unsigned m_target = 0;
     unsigned m_black = 0;
+    unsigned m_input = 0;
     unsigned m_vao = 0;
     unsigned m_vertex = 0;
     int m_userString = 1;   /**< source string and line offset the driver uses for the user's code */

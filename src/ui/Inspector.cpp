@@ -3,6 +3,7 @@
 #include "Controls.h"
 #include "Icons.h"
 #include "ParamPanel.h"
+#include "PresetControls.h"
 #include "Project.h"
 #include "Theme.h"
 #include "Thumbnail.h"
@@ -13,9 +14,13 @@
 #include "shader/ShaderEffect.h"
 
 #include <QComboBox>
+#include <QGridLayout>
 #include <QHBoxLayout>
+#include <QInputDialog>
+#include <QJsonArray>
 #include <QLabel>
 #include <QLineEdit>
+#include <QLocale>
 #include <QListWidget>
 #include <QMenu>
 #include <QPushButton>
@@ -99,6 +104,8 @@ Inspector::Inspector(Project* project, QWidget* parent) : QWidget(parent), m_pro
     root->setContentsMargins(10, 8, 12, 10);
     root->setSpacing(4);
 
+    root->addWidget(new PresetControls(project, this));
+
     auto* head = new QHBoxLayout();
     m_layersTitle = label(this, "SectionTitle");
     head->addWidget(m_layersTitle, 1);
@@ -146,6 +153,106 @@ Inspector::Inspector(Project* project, QWidget* parent) : QWidget(parent), m_pro
     m_opacity = new SliderRow(m_layerBox);
     m_opacity->setRange(0, 100, 1, "%");
     lv->addWidget(m_opacity);
+
+    m_colorLabel = label(m_layerBox, "Dim", 8);
+    lv->addWidget(m_colorLabel);
+    auto* colorGrid = new QGridLayout();
+    colorGrid->setHorizontalSpacing(8);
+    colorGrid->setVerticalSpacing(4);
+    colorGrid->setColumnStretch(1, 1);
+    m_hueLabel = new QLabel(m_layerBox);
+    m_hue = new SliderRow(m_layerBox);
+    m_hue->setRange(-180, 180, 1, QStringLiteral("°"));
+    m_satLabel = new QLabel(m_layerBox);
+    m_saturation = new SliderRow(m_layerBox);
+    m_saturation->setRange(0, 400, 1, "%");
+    m_lightLabel = new QLabel(m_layerBox);
+    m_lightness = new SliderRow(m_layerBox);
+    m_lightness->setRange(0, 400, 1, "%");
+    m_contrastLabel = new QLabel(m_layerBox);
+    m_contrast = new SliderRow(m_layerBox);
+    m_contrast->setRange(0, 400, 1, "%");
+    m_tintLabel = new QLabel(m_layerBox);
+    auto* tintBox = new QWidget(m_layerBox);
+    auto* tintRow = new QHBoxLayout(tintBox);
+    tintRow->setContentsMargins(0, 0, 0, 0);
+    tintRow->setSpacing(6);
+    m_tint = new ColorButton(tintBox);
+    m_tintReset = new QToolButton(tintBox);
+    m_tintReset->setObjectName("Flat");
+    m_tintReset->setIcon(icons::get(icons::Id::Undo));
+    m_tintReset->setCursor(Qt::PointingHandCursor);
+    tintRow->addWidget(m_tint, 1);
+    tintRow->addWidget(m_tintReset);
+    colorGrid->addWidget(m_hueLabel, 0, 0);
+    colorGrid->addWidget(m_hue, 0, 1);
+    colorGrid->addWidget(m_satLabel, 1, 0);
+    colorGrid->addWidget(m_saturation, 1, 1);
+    colorGrid->addWidget(m_lightLabel, 2, 0);
+    colorGrid->addWidget(m_lightness, 2, 1);
+    colorGrid->addWidget(m_contrastLabel, 3, 0);
+    colorGrid->addWidget(m_contrast, 3, 1);
+    colorGrid->addWidget(m_tintLabel, 4, 0);
+    colorGrid->addWidget(tintBox, 4, 1);
+    lv->addLayout(colorGrid);
+
+    // Pictures only (media and painted layers): procedural effects are soft or sharp by design.
+    m_detailBox = new QWidget(m_layerBox);
+    auto* dv = new QVBoxLayout(m_detailBox);
+    dv->setContentsMargins(0, 0, 0, 0);
+    dv->setSpacing(4);
+    m_glowTitle = label(m_detailBox, "Dim", 8);
+    dv->addWidget(m_glowTitle);
+    auto* glowGrid = new QGridLayout();
+    glowGrid->setHorizontalSpacing(8);
+    glowGrid->setVerticalSpacing(4);
+    glowGrid->setColumnStretch(1, 1);
+    m_glowLabel = new QLabel(m_detailBox);
+    m_glow = new SliderRow(m_detailBox);
+    m_glow->setRange(0, 100, 1, "%");
+    m_glowSizeLabel = new QLabel(m_detailBox);
+    m_glowSize = new SliderRow(m_detailBox);
+    m_glowSize->setRange(0.5, 4, 0.1);
+    m_blurLabel = new QLabel(m_detailBox);
+    m_blur = new SliderRow(m_detailBox);
+    m_blur->setRange(0, 3, 0.1);
+    m_sharpenLabel = new QLabel(m_detailBox);
+    m_sharpen = new SliderRow(m_detailBox);
+    m_sharpen->setRange(0, 200, 1, "%");
+    glowGrid->addWidget(m_glowLabel, 0, 0);
+    glowGrid->addWidget(m_glow, 0, 1);
+    glowGrid->addWidget(m_glowSizeLabel, 1, 0);
+    glowGrid->addWidget(m_glowSize, 1, 1);
+    glowGrid->addWidget(m_blurLabel, 2, 0);
+    glowGrid->addWidget(m_blur, 2, 1);
+    glowGrid->addWidget(m_sharpenLabel, 3, 0);
+    glowGrid->addWidget(m_sharpen, 3, 1);
+    dv->addLayout(glowGrid);
+    lv->addWidget(m_detailBox);
+
+    // Keyframe layers keep their timing in the keys, so this box is hidden for them.
+    m_timeBox = new QWidget(m_layerBox);
+    auto* tv = new QVBoxLayout(m_timeBox);
+    tv->setContentsMargins(0, 0, 0, 0);
+    tv->setSpacing(4);
+    m_timeTitle = label(m_timeBox, "Dim", 8);
+    tv->addWidget(m_timeTitle);
+    auto* timeGrid = new QGridLayout();
+    timeGrid->setHorizontalSpacing(8);
+    timeGrid->setVerticalSpacing(4);
+    timeGrid->setColumnStretch(1, 1);
+    m_speedLabel = new QLabel(m_timeBox);
+    m_speed = new SliderRow(m_timeBox);
+    m_speed->setRange(0.25, 4, 0.05, QStringLiteral("×"));
+    m_offsetLabel = new QLabel(m_timeBox);
+    m_offset = new SliderRow(m_timeBox);
+    m_offset->setRange(0, 100, 1, "%");
+    timeGrid->addWidget(m_speedLabel, 0, 0);
+    timeGrid->addWidget(m_speed, 0, 1);
+    timeGrid->addWidget(m_offsetLabel, 1, 0);
+    timeGrid->addWidget(m_offset, 1, 1);
+    tv->addLayout(timeGrid);
+    lv->addWidget(m_timeBox);
 
     m_maskLabel = label(m_layerBox, "Dim", 8);
     lv->addWidget(m_maskLabel);
@@ -253,6 +360,58 @@ Inspector::Inspector(Project* project, QWidget* parent) : QWidget(parent), m_pro
         l->opacity = v / 100.0;
         m_project->notifyLayerChanged(m_project->currentIndex());
     });
+    connect(m_hue, &SliderRow::editStarted, m_project, &Project::checkpoint);
+    connect(m_hue, &SliderRow::valueChanged, this, [this](double v) {
+        Layer* l = m_project->currentLayer();
+        if (m_syncing || !l)
+            return;
+        l->hue = v;
+        m_project->notifyLayerChanged(m_project->currentIndex());
+    });
+    connect(m_saturation, &SliderRow::editStarted, m_project, &Project::checkpoint);
+    connect(m_saturation, &SliderRow::valueChanged, this, [this](double v) {
+        Layer* l = m_project->currentLayer();
+        if (m_syncing || !l)
+            return;
+        l->saturation = v / 100.0;
+        m_project->notifyLayerChanged(m_project->currentIndex());
+    });
+    auto bindSlider = [this](SliderRow* slider, auto apply) {
+        connect(slider, &SliderRow::editStarted, m_project, &Project::checkpoint);
+        connect(slider, &SliderRow::valueChanged, this, [this, apply](double v) {
+            Layer* l = m_project->currentLayer();
+            if (m_syncing || !l)
+                return;
+            apply(l, v);
+            m_project->notifyLayerChanged(m_project->currentIndex());
+        });
+    };
+    bindSlider(m_lightness, [](Layer* l, double v) { l->lightness = v / 100.0; });
+    bindSlider(m_contrast, [](Layer* l, double v) { l->contrast = v / 100.0; });
+    bindSlider(m_glow, [](Layer* l, double v) { l->glow = v / 100.0; });
+    bindSlider(m_glowSize, [](Layer* l, double v) { l->glowSize = v; });
+    bindSlider(m_blur, [](Layer* l, double v) { l->blur = v; });
+    bindSlider(m_sharpen, [](Layer* l, double v) { l->sharpen = v / 100.0; });
+    bindSlider(m_speed, [](Layer* l, double v) { l->timeScale = v; });
+    bindSlider(m_offset, [](Layer* l, double v) { l->timeOffset = std::min(v / 100.0, 0.999); });
+    connect(m_tint, &ColorButton::editStarted, m_project, &Project::checkpoint);
+    connect(m_tint, &ColorButton::colorChanged, this, [this](const QColor& c) {
+        Layer* l = m_project->currentLayer();
+        if (m_syncing || !l)
+            return;
+        l->tint = c;
+        m_tintReset->setEnabled(l->tints());
+        m_project->notifyLayerChanged(m_project->currentIndex());
+    });
+    connect(m_tintReset, &QToolButton::clicked, this, [this] {
+        Layer* l = m_project->currentLayer();
+        if (!l || !l->tints())
+            return;
+        m_project->checkpoint();
+        l->tint = Qt::white;
+        m_project->notifyLayerChanged(m_project->currentIndex());
+        syncCurrent();
+    });
     connect(m_maskPaint, &QToolButton::toggled, this, &Inspector::maskPaintToggled);
     connect(m_shaderEdit, &QPushButton::clicked, this, &Inspector::shaderEditRequested);
     connect(m_maskClear, &QToolButton::clicked, this, [this] {
@@ -279,6 +438,81 @@ Inspector::Inspector(Project* project, QWidget* parent) : QWidget(parent), m_pro
         syncCurrent();
     });
 
+    // Right-clicking a setting offers it to the preset settings at the top of the Inspector.
+    auto layerName = [this](int li) {
+        const Layer* l = m_project->layer(li);
+        return l && !l->name.isEmpty() ? l->name : tr("Layer %1").arg(li + 1);
+    };
+    auto exposable = [this, layerName](QLabel* label, const QString& type, const QString& prop, double min, double max,
+                                       double step, const QString& suffix, double scale) {
+        label->setContextMenuPolicy(Qt::CustomContextMenu);
+        connect(label, &QWidget::customContextMenuRequested, this,
+                [=, this](const QPoint& p) {
+                    const int li = m_project->currentIndex();
+                    if (!m_project->layer(li))
+                        return;
+                    QJsonObject target{{"layer", li}};
+                    if (!prop.isEmpty())
+                        target.insert("prop", prop);
+                    QJsonObject control{{"type", type}};
+                    if (type == QLatin1String("number")) {
+                        control.insert("min", min);
+                        control.insert("max", max);
+                        control.insert("step", step);
+                        control.insert("suffix", suffix);
+                        if (scale != 1.0) {
+                            target.insert("from", min * scale);
+                            target.insert("to", max * scale);
+                        }
+                    }
+                    control.insert("targets", QJsonArray{target});
+                    offerPresetControl(control, label->text() + QStringLiteral(" · ") + layerName(li),
+                                       label->mapToGlobal(p));
+                });
+    };
+    exposable(m_opacityLabel, "opacity", {}, 0, 0, 0, {}, 1);
+    for (QLabel* l : {m_colorLabel, m_hueLabel, m_satLabel, m_lightLabel})
+        exposable(l, "hue", {}, 0, 0, 0, {}, 1);
+    exposable(m_tintLabel, "color", "tint", 0, 0, 0, {}, 1);
+    exposable(m_glowLabel, "number", "glow", 0, 100, 1, "%", 0.01);
+    exposable(m_glowSizeLabel, "number", "glowSize", 0.5, 4, 0.1, {}, 1);
+    exposable(m_blurLabel, "number", "blur", 0, 3, 0.1, {}, 1);
+    exposable(m_sharpenLabel, "number", "sharpen", 0, 200, 1, "%", 0.01);
+    exposable(m_contrastLabel, "number", "contrast", 0, 400, 1, "%", 0.01);
+    connect(m_params, &ParamPanel::paramContextMenu, this, [this, layerName](const QString& id, const QPoint& pos) {
+        const int li = m_project->currentIndex();
+        const Layer* l = m_project->layer(li);
+        if (!l || !l->effect)
+            return;
+        for (const ParamDesc& d : l->effect->params()) {
+            if (d.id != id)
+                continue;
+            QJsonObject control;
+            if (d.type == ParamDesc::Type::Color) {
+                control.insert("type", "color");
+            } else {
+                const bool angle = d.type == ParamDesc::Type::Angle;
+                control.insert("type", "number");
+                control.insert("min", angle ? 0.0 : d.min);
+                control.insert("max", angle ? 360.0 : d.max);
+                control.insert("step", d.type == ParamDesc::Type::Int ? std::max(1.0, std::round(d.step)) : d.step);
+                control.insert("suffix", angle ? QStringLiteral("°") : d.suffix);
+            }
+            control.insert("targets", QJsonArray{QJsonObject{{"layer", li}, {"param", id}}});
+            offerPresetControl(control, trEffect(d.label) + QStringLiteral(" · ") + layerName(li), pos);
+            return;
+        }
+    });
+    m_list->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_list, &QWidget::customContextMenuRequested, this, [this, layerName](const QPoint& p) {
+        const QListWidgetItem* item = m_list->itemAt(p);
+        if (!item)
+            return;
+        const int li = rowToLayer(m_list->row(item));
+        offerPresetControl(QJsonObject{{"type", "toggle"}, {"targets", QJsonArray{QJsonObject{{"layer", li}}}}},
+                           layerName(li), m_list->viewport()->mapToGlobal(p));
+    });
+
     connect(m_params, &ParamPanel::editStarted, m_project, &Project::checkpoint);
     connect(m_params, &ParamPanel::changed, this, [this] {
         m_project->notifyLayerChanged(m_project->currentIndex());
@@ -292,6 +526,7 @@ Inspector::Inspector(Project* project, QWidget* parent) : QWidget(parent), m_pro
     connect(m_project, &Project::layerChanged, this, [this](int i) {
         refreshRow(i);
         if (i == m_project->currentIndex()) {
+            syncEffectHint();   // a shader layer becomes a filter with its input switch
             Layer* l = m_project->currentLayer();
             const int n = l && !l->mask.empty()
                               ? int(std::count_if(l->mask.begin(), l->mask.end(), [](float w) { return w > 0.5f; }))
@@ -327,6 +562,34 @@ void Inspector::retranslateUi()
     for (int i = 0; i < blends.size(); ++i)
         m_blend->setItemText(i, blends[i]);
     m_opacityLabel->setText(tr("Opacity"));
+    m_colorLabel->setText(tr("Colour"));
+    m_hueLabel->setText(tr("Hue"));
+    m_hue->setToolTip(tr("Turns every colour of the layer around the colour wheel; brightness stays"));
+    m_satLabel->setText(tr("Saturation"));
+    m_saturation->setToolTip(tr("0% turns the layer grey, 200% makes its colours twice as vivid"));
+    m_lightLabel->setText(tr("Lightness"));
+    m_lightness->setToolTip(tr("0% turns the layer black, above 100% brightens it towards white"));
+    m_contrastLabel->setText(tr("Contrast"));
+    m_contrast->setToolTip(tr("Above 100% dark parts get darker and light parts lighter; below, both move towards "
+                              "grey. Colours keep their hue"));
+    m_tintLabel->setText(tr("Tint"));
+    m_tint->setToolTip(tr("Turns the layer into shades of one colour: white and full colours take it exactly"));
+    m_tintReset->setToolTip(tr("No tint"));
+    m_glowTitle->setText(tr("Glow and sharpness"));
+    m_glowLabel->setText(tr("Glow"));
+    m_glow->setToolTip(tr("Lit LEDs light up their neighbours, like light spilling through frosted plastic"));
+    m_glowSizeLabel->setText(tr("Glow size"));
+    m_glowSize->setToolTip(tr("How far the glow reaches, in LEDs"));
+    m_blurLabel->setText(tr("Blur"));
+    m_blur->setToolTip(tr("Softens the layer across neighbouring LEDs, in LEDs"));
+    m_sharpenLabel->setText(tr("Sharpen"));
+    m_sharpen->setToolTip(tr("Sets each LED apart from its neighbours so outlines read crisper; 100% is the usual "
+                             "amount"));
+    m_timeTitle->setText(tr("Time"));
+    m_speedLabel->setText(tr("Speed"));
+    m_speed->setToolTip(tr("How many of the layer's own loops play per scene loop. Whole numbers loop seamlessly."));
+    m_offsetLabel->setText(tr("Offset"));
+    m_offset->setToolTip(tr("Starts the layer's loop later, as a share of its length"));
     m_maskLabel->setText(tr("Area"));
     m_maskPaint->setText(tr("Paint area"));
     m_maskPaint->setToolTip(tr("Brush over the LEDs this layer should affect.\n"
@@ -344,6 +607,30 @@ void Inspector::setMaskPainting(bool on)
 {
     const QSignalBlocker block(m_maskPaint);
     m_maskPaint->setChecked(on);
+}
+
+void Inspector::offerPresetControl(QJsonObject control, const QString& name, const QPoint& globalPos)
+{
+    QMenu menu(this);
+    QAction* add = menu.addAction(tr("Show in preset settings…"));
+    add->setToolTip(tr("Puts this setting among the preset settings at the top of the Inspector; they are saved with "
+                       "the scene and with Save as preset"));
+    if (menu.exec(globalPos) != add)
+        return;
+    bool ok = false;
+    const QString label = QInputDialog::getText(this, tr("Preset setting"), tr("Name in the preset settings:"),
+                                                QLineEdit::Normal, name, &ok)
+                              .trimmed();
+    if (!ok || label.isEmpty())
+        return;
+    control.insert("label", QJsonObject{{QLocale().name().left(2), label}});
+    m_project->checkpoint();
+    QJsonObject preset = m_project->scene().preset;
+    QJsonArray controls = preset.value("controls").toArray();
+    controls.append(control);
+    preset.insert("controls", controls);
+    m_project->scene().preset = preset;
+    m_project->notifyLayersChanged();
 }
 
 int Inspector::rowToLayer(int row) const
@@ -396,6 +683,8 @@ void Inspector::refreshRow(int layerIndex)
     QStringList bits;
     if (l->effect)
         bits << trEffect(l->effect->name());
+    if (l->effect && l->effect->isFilter())
+        bits << tr("filter");
     if (l->blend != BlendMode::Normal)
         bits << trEffect(blendModeNames().value(int(l->blend)));
     if (l->opacity < 0.999)
@@ -404,7 +693,7 @@ void Inspector::refreshRow(int layerIndex)
         bits << tr("area");
     w->sub->setText(bits.join(QStringLiteral(" · ")));
     if (l->effect)
-        w->thumb->setPixmap(renderEffectThumbnail(*l->effect, 0.18, QSize(40, 36)));
+        w->thumb->setPixmap(renderEffectThumbnail(*l->effect, 0.18, QSize(40, 36), 2.0, l));
     w->setEnabled(true);
     w->name->setStyleSheet(l->visible ? QString() : QStringLiteral("color: %1;").arg(theme::kTextDim.name()));
 }
@@ -425,6 +714,24 @@ void Inspector::syncCurrent()
         m_name->setText(l->name);
         m_blend->setCurrentIndex(int(l->blend));
         m_opacity->setValue(l->opacity * 100.0);
+        m_hue->setValue(l->hue);
+        m_saturation->setValue(l->saturation * 100.0);
+        m_lightness->setValue(l->lightness * 100.0);
+        m_contrast->setValue(l->contrast * 100.0);
+        m_tint->setColor(l->tint);
+        m_tintReset->setEnabled(l->tints());
+        m_glow->setValue(l->glow * 100.0);
+        m_glowSize->setValue(l->glowSize);
+        m_blur->setValue(l->blur);
+        m_sharpen->setValue(l->sharpen * 100.0);
+        // A layer of another kind that already has glow, blur or sharpening (from a file) still shows them.
+        const QString type = l->effect ? l->effect->typeId() : QString();
+        m_detailBox->setVisible(type == QLatin1String("media") || type == QLatin1String("keyframes") || l->glow > 0.0
+                                || l->blur > 0.0 || l->sharpen > 0.0);
+        m_speed->setValue(l->timeScale);
+        m_offset->setValue(l->timeOffset * 100.0);
+        m_timeBox->setVisible(!dynamic_cast<KeyframeEffect*>(l->effect.get()) || l->timeScale != 1.0
+                              || l->timeOffset != 0.0);
         const int n = l->mask.empty()
                           ? -1
                           : int(std::count_if(l->mask.begin(), l->mask.end(), [](float w) { return w > 0.5f; }));
@@ -433,10 +740,7 @@ void Inspector::syncCurrent()
         const bool isKeys = dynamic_cast<KeyframeEffect*>(l->effect.get()) != nullptr;
         m_effectTitle->setText(l->effect ? tr("Effect · %1").arg(trEffect(l->effect->name())).toUpper()
                                          : tr("Effect").toUpper());
-        m_effectHint->setVisible(isKeys);
-        m_effectHint->setText(tr("Paint right on the dock: brush, eraser, fill and eyedropper are in the strip above it.\n"
-                                 "Strokes go into the keyframe at the playhead; if there is none, one is created. "
-                                 "Colours flow smoothly between keyframes."));
+        syncEffectHint();
         m_shaderEdit->setVisible(dynamic_cast<ShaderEffect*>(l->effect.get()) != nullptr);
         m_params->setEffect(isKeys ? nullptr : l->effect.get());
     } else {
@@ -446,6 +750,21 @@ void Inspector::syncCurrent()
         m_params->setEffect(nullptr);
     }
     m_syncing = false;
+}
+
+void Inspector::syncEffectHint()
+{
+    const Layer* l = m_project->currentLayer();
+    const bool isKeys = l && dynamic_cast<KeyframeEffect*>(l->effect.get()) != nullptr;
+    const bool isFilter = l && l->effect && l->effect->isFilter();
+    m_effectHint->setVisible(isKeys || isFilter);
+    if (isKeys)
+        m_effectHint->setText(tr("Paint right on the dock: brush, eraser, fill and eyedropper are in the strip above it.\n"
+                                 "Strokes go into the keyframe at the playhead; if there is none, one is created. "
+                                 "Colours flow smoothly between keyframes."));
+    else if (isFilter)
+        m_effectHint->setText(tr("A filter: it reworks everything below this layer. Opacity, blend mode and area say how "
+                                 "much of the result goes over the original; the colour settings apply to the result."));
 }
 
 } // namespace fg

@@ -1,0 +1,1428 @@
+{
+ "format": "flyglow-presets",
+ "version": 1,
+ "presets": [
+  {
+   "path": "abstract/fractal-zoom.flyglow",
+   "sha256": "24edda85805d77e36eed1a64c2f498120f28561dacffdd3656435690e757c5e7",
+   "size": 5514,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "abstract/honeycomb.flyglow",
+   "sha256": "57b38b9c945ad86fcb215013c21abc445b131b534a7547468ca3c0d1a589fe5d",
+   "size": 6173,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "abstract/ink.flyglow",
+   "sha256": "4dcfdd6b2c713ffad7e8df6f34bc77a30267c80fa746f234318a171c449bcff2",
+   "size": 5573,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "abstract/kaleidoscope.flyglow",
+   "sha256": "79422dfdc2dcc729ff83c9cedef9b2e00f5a51a436a6abc6da5eeb9d0521c086",
+   "size": 1974,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "abstract/lava-lamp.flyglow",
+   "sha256": "9cb91439b3079fd3cc5a7c3b37730786ab1e8b86224f39d4aa345082646471eb",
+   "size": 1873,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "abstract/liquid-chrome.flyglow",
+   "sha256": "4a5d4b6e240c5b57d6f3a940fb659f716f711731a644be554019229948f30b27",
+   "size": 5853,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "abstract/mandala.flyglow",
+   "sha256": "ae2c7287580d4667ed0bce3c5d21dba9480d051dfd36ec0e6cd96827f191b9b8",
+   "size": 5958,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "abstract/matrix.flyglow",
+   "sha256": "babc8ed809ef4d49ae4d92aa5ef48d0f3fab6577913341d32f6b2395fd19bbff",
+   "size": 4369,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "abstract/maze-flow.flyglow",
+   "sha256": "2367849d713b679d5d7957844aee2e98797e9c003281b167910bf50c3ed39b22",
+   "size": 6282,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "abstract/moire.flyglow",
+   "sha256": "23c36d9209c1e11386f6c507d9df6f61b20664e1a1f37e9ef5b8750010b2e957",
+   "size": 4757,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "abstract/op-art-spiral.flyglow",
+   "sha256": "523c756fa13ee27748aff0214acd8b166fd413dcf5180d9616ec3598fd38cb00",
+   "size": 4978,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "abstract/plasma.flyglow",
+   "sha256": "0cdf850d5749fab0396b70fbd069dbcbd855f7bbf72df0dc26a7ff0555b3d5b5",
+   "size": 1531,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "abstract/polygons.flyglow",
+   "sha256": "990d4911fa4965ce59714b0425dbefc1abf0bbc26207b6e835ac417b1798a0fe",
+   "size": 5246,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "ambient/bioluminescence.flyglow",
+   "sha256": "9f5810358e9c3451ffbe36c37a7585912ffcf6fdb71c81e260d6963137a18f2b",
+   "size": 5438,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "ambient/candle.flyglow",
+   "sha256": "0b25fe832449969c0f9c8f29827b4f352443f32d1358d50c8c4ddb297666be8c",
+   "size": 5861,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "ambient/caustics.flyglow",
+   "sha256": "916ed326c84cc342976ca2f53cfeda9b25db49ae33cb46304d0d70219be74fb2",
+   "size": 5100,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "ambient/embers.flyglow",
+   "sha256": "4937743aa878d9a25406e464eb463806d9650eb65edb43e7cfd597a949467fc2",
+   "size": 6128,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "ambient/focus-breath.flyglow",
+   "sha256": "19212f6dbb489e00194ed45a1ca9725e93f79bf22d1172198446a16601751564",
+   "size": 4833,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "ambient/lofi-drift.flyglow",
+   "sha256": "034b363b801eeba27d0a9bda18c40b9952059a0f0fc101e4af65f1fb91317d85",
+   "size": 5274,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "ambient/neon-rain.flyglow",
+   "sha256": "148510f88ef927c19bc05f5644997491a3f4f3191aa334671456359ad3a139fb",
+   "size": 5691,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "ambient/neon-sign.flyglow",
+   "sha256": "696ba7fade69a4152669849579abb3023d878c841fd74b1ba30474397164da69",
+   "size": 194751,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "ambient/night-city.flyglow",
+   "sha256": "40d383ece75195284b5e0561e91effe20b70bb6dc9966ad92dfb566d364b113e",
+   "size": 130366,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "ambient/night-light.flyglow",
+   "sha256": "b1059972261a5141b39388b4aeeedf8e0c6d3bdaf40b1a7616634f68cef9ea4e",
+   "size": 5228,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "ambient/ocean-breath.flyglow",
+   "sha256": "a927f670636cf823eb9d2bd38e05ab33182b1535523e194010ca73e04a3dc83c",
+   "size": 4826,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "ambient/reading-lamp.flyglow",
+   "sha256": "990670a820bdaf724119c5a0a8d41fef493e880927c5a34639768ffd756b822d",
+   "size": 4780,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "ambient/sunset.flyglow",
+   "sha256": "20e4b99b8f38e0343ca4d2861e6be1466c5b8f8ee5b1b28a4f08e1163a1c0484",
+   "size": 5771,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "ambient/twilight.flyglow",
+   "sha256": "dcafb5776a9329b5bdae53498767e316d070cb50dc2449870a05d250b007019d",
+   "size": 5182,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "animals/axolotl.flyglow",
+   "sha256": "518922c893a7e6b07a5de61f7bce9ecd9d9459e680c1ae0d1071b67ad9cadc15",
+   "size": 76847,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "animals/bee.flyglow",
+   "sha256": "67212ef817afab73ed39ed194a977c93da73d942acdfd765aaf0b76c60d4ec73",
+   "size": 152647,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "animals/butterfly.flyglow",
+   "sha256": "690bdb6235d2b2a15ccbf9bed22ece6fec0f270e1f7bb94577966655d5ed1fc2",
+   "size": 99521,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "animals/cat-eyes.flyglow",
+   "sha256": "ce07448f123036cf3ff691b96a92340e244fa86a23fb296fc93570665be84744",
+   "size": 67571,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "animals/chameleon.flyglow",
+   "sha256": "0c5ac13456d09d6dcf6fdfb729c7788422a649080028dfa0fe6d30578b90c516",
+   "size": 76990,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "animals/dragon-eye.flyglow",
+   "sha256": "d89009399cdcd07a78a9c3dfb4a7bd0b3f7a0f24d6c61a1e3325f964827749d3",
+   "size": 11854,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "animals/fox.flyglow",
+   "sha256": "33cc6cbfb03222c78b0812328bec1565500eca4521e46d1dfa8dcb591d6dedc4",
+   "size": 29534,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "animals/frog.flyglow",
+   "sha256": "018b72d80cf33175cd6e1e44eb6875bd6908de788e3a6a8469e340fcd87ce678",
+   "size": 136791,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "animals/hummingbird.flyglow",
+   "sha256": "24460739fe5f62542a39302b69760f00c9920509a35936d906b1e1f8c230b01e",
+   "size": 77467,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "animals/jellyfish.flyglow",
+   "sha256": "9080f0fa20b070f57eaafc0be46572ed54ee814a64bea1f1e21a5efc28c6aeec",
+   "size": 9484,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "animals/koi-pond.flyglow",
+   "sha256": "e0929ead35601a4786df88622e0f873be7f04d509cbc87951e9d95e3c8fe9cb1",
+   "size": 6379,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "animals/octopus.flyglow",
+   "sha256": "81205606601d3ec9632d9f4737f29931428664d0dca82345ebe7efaa09f93dce",
+   "size": 105401,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "animals/owl.flyglow",
+   "sha256": "e2603a99ae9493ac38b99638e5628776cd7a9cd2452ee84984623a81602dc0cd",
+   "size": 92425,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "animals/panda.flyglow",
+   "sha256": "42e84c69f3410c696fc055c6c7529b8988d7d218f3239139299f387fe2270f45",
+   "size": 66927,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "animals/peacock.flyglow",
+   "sha256": "1310b4d94390a22ad6ee80c352ca0ec6bedf7eb26101e08e7e5f5a5cc02aa170",
+   "size": 64651,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "animals/penguin.flyglow",
+   "sha256": "db28061186b7c2d0743ef5723b3d2e86358c273f2dd40e5d8dc49ea283c7c5d3",
+   "size": 71134,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "animals/whale.flyglow",
+   "sha256": "7409e03edb717a3d1339fc8e685bd2a0417b5fb8f0e7826c3ef310c45c8a97b0",
+   "size": 105765,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "animals/wolf-moon.flyglow",
+   "sha256": "423cb75230f4c75c91831ed807cc93f2954e4c0fe434ebf0a0c4b7c3e3709531",
+   "size": 18663,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "anime/goku.flyglow",
+   "sha256": "769012488d437655b972d06ec44ab682c25ff89d377b40471373d0574e065d7c",
+   "size": 64475,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "anime/jojo-menacing.flyglow",
+   "sha256": "5fb6bc2312ac4bdcabab407a5c2ce31ab48164fc2a195f0dc7fa3f39cb5d1c2e",
+   "size": 96253,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "anime/pochita.flyglow",
+   "sha256": "8444db2291d019b87edf726d8bead08ffbafaa6253a5300ef07ff2ed3fee2e4d",
+   "size": 77260,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "anime/sharingan.flyglow",
+   "sha256": "fc29d4b3e260f826da4a0072c31d5276b50347c86b6fc44cef8773a1c2a1a727",
+   "size": 115380,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "anime/straw-hat-jolly-roger.flyglow",
+   "sha256": "aa06bcedf0e1dfd14c97d1bbb67344ae40e463bcd10df4d0233bf56663e4f3fa",
+   "size": 52074,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "anime/totoro.flyglow",
+   "sha256": "3f9c9f7530510f9f000c1fc9cb2582f32855bd6d086de0880f7f99a2e4dcefd1",
+   "size": 23580,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/alien.flyglow",
+   "sha256": "89199f9d4f3e3b75ebcf3dab823584aafc9c09e607817a8acce9132435cdc19b",
+   "size": 51770,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/angry.flyglow",
+   "sha256": "1d564553adf1a518002c0943805b3a177ca3a00ef2aa1ca8b4066e395b30769a",
+   "size": 159240,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/cigarette.flyglow",
+   "sha256": "8d82b6f4639832644540f62054163ba5237bfd246fabee79d2096424b59846a4",
+   "size": 54682,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/clown.flyglow",
+   "sha256": "2dea7a650e5ef6d80c7a2e4039a2355d73e93ce9ce55282ecfd414786c93e6aa",
+   "size": 23079,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/deal-with-it-v2.flyglow",
+   "sha256": "0df4721f17c34a392f9e24f81641e6e70eef5ab6fe10c31a2f66865bb8e739c8",
+   "size": 73541,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/deal-with-it.flyglow",
+   "sha256": "a2db02ef50c8800a1d43e2a45083d315a5e4f418c36ae0be62349b386603ead5",
+   "size": 39107,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/devil.flyglow",
+   "sha256": "ea8dcaa287136448d81b23c471102eecc3455febaa7c8c31ee8e002bf0db5997",
+   "size": 41003,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/eyes.flyglow",
+   "sha256": "bc38c9eb5c136e8307646683e0fafeb843f0e2c7fe701b8564c3f6778d00edf8",
+   "size": 115204,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/ghost.flyglow",
+   "sha256": "b9f9d10d40796968d56cf11ea7d0ca0ead34a84db8336fb9ced09d30faef1af4",
+   "size": 77527,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/heart-eyes.flyglow",
+   "sha256": "15854307c482e764a615407440a74dc862dba469e19135384037096a8b723e8b",
+   "size": 96333,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/hundred.flyglow",
+   "sha256": "20e631f84b8f5a1cc1b4286211d563edd46274868da6ae94e012d7e3af7edb34",
+   "size": 39105,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/joy.flyglow",
+   "sha256": "5eb660cc5b12a7b612c1016784442bb42aec3ce3e8328f9fb0b3ce090b3d9b00",
+   "size": 102736,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/mind-blown.flyglow",
+   "sha256": "b72751a3971744f13af0450d289e953697a3509f8241f2fff27f63c90a856b0d",
+   "size": 143624,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/moai.flyglow",
+   "sha256": "f017ba66a4f9c886a8904e082d794b0570396b0d49b702aeeb490f94a8a7d21d",
+   "size": 16451,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/moai2.flyglow",
+   "sha256": "a73112e9df3af75574e2970656e5604634006be1875f9764cfc23a8e990bff93",
+   "size": 16439,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/moai3-v2.flyglow",
+   "sha256": "502ed4343511cbcce2a96df76e73a0fddf8955a4379a629dc50726df30e86b73",
+   "size": 29552,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/moai3.flyglow",
+   "sha256": "01873a8622254fc87c89c1faabe39340c3df013326dcadb800ba1c5cf451181f",
+   "size": 29474,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/nerd.flyglow",
+   "sha256": "fdbfc6dc657042aa9c232497c53badf7a4e998324cfab9c344d636f6f890e31f",
+   "size": 48579,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/robot.flyglow",
+   "sha256": "e157c9601e2638b6fa716f568220bdddf7da2adcd893ac1c7289d7ab9a5de2a4",
+   "size": 80128,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/skull.flyglow",
+   "sha256": "8a2ef908772669740af56a4e5203f6e03208b3fd1eb4779285e0d2a7dae1af10",
+   "size": 38940,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/sleeping.flyglow",
+   "sha256": "d06d04bd6b8534b1ad31414c7e986d78511c37c7c776304028644b70212e300c",
+   "size": 89776,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/star-struck.flyglow",
+   "sha256": "b1b39f6c3a1a8c0c1047520306a057d90839ec43b36515d8347242262397b93a",
+   "size": 172051,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "emoji/wink.flyglow",
+   "sha256": "51cd91b68feee93467d4a7bec155cfa9ff10e57c20d5336b1e04d15e419ff53b",
+   "size": 42261,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/alan-wake.flyglow",
+   "sha256": "0284717fe7b7225794d4cf008ff41b50ef34df4bf676cbfe01461b6e344fa28e",
+   "size": 2575,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/among-us.flyglow",
+   "sha256": "220be7e28a5b09ba6a24a4dc71e009c199cda47663f6ee5e9010bb4d8bcd5423",
+   "size": 28791,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/aperture.flyglow",
+   "sha256": "1eec06494efa858721416eab7268fe61598e4fb891fb8db20312413acfbcd642",
+   "size": 77299,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/apex-legends.flyglow",
+   "sha256": "aad8244ba4aaac1b85c34c11053e0a87eecaedc4467f9ed724d0ad9f7bdb1aae",
+   "size": 64424,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/balatro.flyglow",
+   "sha256": "d0c3e6b8f5a13c036674500e24f6b032db9de7e8074075ceaf3a768cdb4f646f",
+   "size": 102641,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/bb-pod.flyglow",
+   "sha256": "12f9572a4a932c7b970391a80a2e626761835f369f625908415c901adfb4cdc8",
+   "size": 77615,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/bfg.flyglow",
+   "sha256": "c251b5ec5ce36bcfc840d8e37ce0f13e68c7b6d71b58e153dc9bf60314e5c2e2",
+   "size": 2730,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/bonfire.flyglow",
+   "sha256": "27b429e6769cc0919c64f070b9fcb57e889f7a61c2f8a77f4404e96880ce8166",
+   "size": 10323,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/cacodemon.flyglow",
+   "sha256": "946e88da407f00d68129eb5440bf18f29f3275ca75bb7ad33e9e90c5e11c9146",
+   "size": 36249,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/celeste-strawberry.flyglow",
+   "sha256": "bd1483fcb192928bd661caeb80b47ec95b457d6f9eddf87aba635544783a9e50",
+   "size": 52078,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/control-hiss-v2.flyglow",
+   "sha256": "7f6e8c481d698b9e33e07907c5579c9b47764649572baa4e876025d9f097ecab",
+   "size": 7329,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/control-hiss-v3.flyglow",
+   "sha256": "d9c60f9c6e94383356a8216d4cdbff8b35949065486a3c8a673a7a14b850cb58",
+   "size": 7368,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/control-hiss.flyglow",
+   "sha256": "35a8d6be04be7db503ee03f9f81f6af65eb7fc467e9b622508d4cd70d5318131",
+   "size": 2470,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/corvo-mask.flyglow",
+   "sha256": "0735a1313c8d01fcf832dcb4a5c72ee8a2fa608b0de87ada7d3602ae02d956c3",
+   "size": 77771,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/counter-strike.flyglow",
+   "sha256": "5f63918f347e98b6421107361a27b280dc04d919be966e3c40d8fe7911c0bee5",
+   "size": 23615,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/creeper.flyglow",
+   "sha256": "16b174939650ddf23e14a1a89a48963290d9a58e61a79fea59f1d81e2bae9481",
+   "size": 57785,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/creeper2.flyglow",
+   "sha256": "a62f47b50c8667c6e68b6c2b4932bf2baa64045d6e4d2743d18757f7f29bc39c",
+   "size": 66968,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/cuphead.flyglow",
+   "sha256": "bbd228f5a91a53f7519099b4d4c954985d15b6969f4cb77e598fca9791321b51",
+   "size": 10397,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/cyberpunk-samurai.flyglow",
+   "sha256": "a658789d3b407a9beda9fefd9ed445f61fe79a4c6af5594e3de7a2fe14e15f02",
+   "size": 77519,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/diablo.flyglow",
+   "sha256": "d23da46872ca5225fa8561f251ae0d6e8ff188e2c2577b273f0664eea09d746f",
+   "size": 10182,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/dishonored-heart.flyglow",
+   "sha256": "1a4a8343a50523e2f202ed4f998e52778d533a27f41f0acc95924a6152d04f6e",
+   "size": 77497,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/doom-glyph.flyglow",
+   "sha256": "16afa2ad4b8c11ccf34a9f58f55ddfe47e62e9d003a6012a2f099afafc47c0c1",
+   "size": 8208,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/doom-slayer.flyglow",
+   "sha256": "0cb4684a7dd5070b30bd149dfacca675c6bbdae30a0567cfad31a58c048d9b12",
+   "size": 64405,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/dota2.flyglow",
+   "sha256": "489bb379a37ba13f93abe4f76b42639e770948bfb426ce88836401d2eb583646",
+   "size": 4876,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/enderman.flyglow",
+   "sha256": "2ddf52dbd5b4479c14725ef8f4267b6d29f159b5523ce468845a8d714c553e8a",
+   "size": 21003,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/erdtree.flyglow",
+   "sha256": "7e76303a0790f2d8a3eb2eb3e2b0c8e16125717d0437ca569c992286694048c8",
+   "size": 247920,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/ghost.flyglow",
+   "sha256": "3d5a2491ba3da4c659a506b070ed0ddcbae04c5efb0c2960a88182770a62bda5",
+   "size": 108566,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/glados.flyglow",
+   "sha256": "d349eff9b6ad1f09e3f4ffb256e21985ec7448444fc70a9ef4ac9324dda9a721",
+   "size": 77502,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/god-of-war.flyglow",
+   "sha256": "3e95bc7a8590b6107a29fcdc2b39c55ae57c754d77a9e3292c180c3984ebb8fc",
+   "size": 17882,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/hadouken.flyglow",
+   "sha256": "bf98582f43227560e1251b5a1aae93ab113a826c17201bb45d9dc34b42ad67d3",
+   "size": 96191,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/half-life-v2.flyglow",
+   "sha256": "252d3fe3b7a14695dfbd534e84ab50a98458561c141d90cd5b35e25516fe712f",
+   "size": 55930,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/half-life.flyglow",
+   "sha256": "41ef6c1b58e49fea69f8af316b963cd4656397ae86b2f3654f36a22f4d920ae1",
+   "size": 70762,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/hollow-knight.flyglow",
+   "sha256": "135f226d953b849d0dd8865c27b15f3b1b9a5954669d4bbc0b77962790837f16",
+   "size": 6428,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/hornet.flyglow",
+   "sha256": "415cd63a327a71e40e923f75842e081d5e01e346824dfa2fdad5dcde4a42ce62",
+   "size": 8338,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/league-of-legends.flyglow",
+   "sha256": "87f8b7e3ad567101c20071b82bd7dd2e59adf0ee298ce609a3bea6c164b7bfa7",
+   "size": 64469,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/mega-man.flyglow",
+   "sha256": "7c9368946db4a8be867d6f7d927510cc98af91c8535c340caaabbfa083ecd67d",
+   "size": 17263,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/metal-gear-alert.flyglow",
+   "sha256": "42f7d989f7f3b0b1618837625a147d044ef55c6e6c474c3a3809c922cbe2da81",
+   "size": 102463,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/metroid.flyglow",
+   "sha256": "3cdbd02cb55be0e2177d6c5b383de7c1b2b90e5cd774653aec72afef818e67df",
+   "size": 152830,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/minecraft-cow.flyglow",
+   "sha256": "d79ece44b5b4ed4e33c9def67d803c930dd58defdbb89424612c7f503f288947",
+   "size": 10950,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/minecraft-herobrine.flyglow",
+   "sha256": "45dc033c79365b6a8488acc41e73ab46cac7957e5c77df323100ab7865f713f9",
+   "size": 77346,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/minecraft-pig.flyglow",
+   "sha256": "4d3227003996d6ef015baf8eb1a9cede3fc0f6ad0ab2be4e6494acb0ad032f4e",
+   "size": 17302,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/minecraft-sheep.flyglow",
+   "sha256": "df4b290abe55fd14fc9b79b2e242bf5e93d33a2580d3166124977d70182251ef",
+   "size": 17318,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/minecraft-skeleton.flyglow",
+   "sha256": "9f7bbb9cba3ee7261d3795cadc3ce7cacbd30e36d588be2cda0f712e2e02c27a",
+   "size": 23389,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/minecraft-slime.flyglow",
+   "sha256": "410a5a418a993b444613c797c841ae49ef43d3f8276d0974bc9d4d569e77b67c",
+   "size": 77246,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/minecraft-steve.flyglow",
+   "sha256": "8fb26e6ce03866657eab04cc46bf62c95a13b29f58d9495f1e138144a5382c92",
+   "size": 17282,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/minecraft-zombie.flyglow",
+   "sha256": "4dd7d05f56591a190887e08c7df71e8aaa9cea46a4368ffce0fd6ad9861a2a8d",
+   "size": 17062,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/nether-portal.flyglow",
+   "sha256": "04d4fc7fa8db50f27b2864a256d0736df4d484b8961f9face851a044f5045477",
+   "size": 8532,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/odradek.flyglow",
+   "sha256": "d5d58b2c1a662de71e0cc4bc2788f04244964a42a9eb63bc04231e0a54e26512",
+   "size": 194276,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/ori.flyglow",
+   "sha256": "7d84f010959512b34639e4323526a3a033977ba30d2e5045e596f75a5829bf00",
+   "size": 2278,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/outsider-mark.flyglow",
+   "sha256": "25078aef2d4095b23d41730ea96cf9aee2f9c57cedce8675089719f02b0ecd4b",
+   "size": 78064,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/overwatch.flyglow",
+   "sha256": "06f817bd8b61911775c66448f6c33a4b7831332935a074f53af489d384e90cad",
+   "size": 64403,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/pikachu.flyglow",
+   "sha256": "31b65152d3639fb39f9c370a1989ec409a90cedd5c29329fbc549d502e8cbb04",
+   "size": 38320,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/pokeball.flyglow",
+   "sha256": "4f8b377b58087493687c4e9729f16aae1e56c6852b220ac8d9ab0aabe6e10018",
+   "size": 48630,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/portal.flyglow",
+   "sha256": "f2946e050ed647f18d564cd4875b0b4480d46f9b3f299f3e5728874678981cc8",
+   "size": 4954,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/sans.flyglow",
+   "sha256": "cbb8d8acfb08b16c16203780d3a357b7a53580036d5b3423a0955b909d7c7bf1",
+   "size": 51881,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/sheikah-eye.flyglow",
+   "sha256": "d9b39b345e9263821d342c5d8ba10bc3ff9f881bab6970dc25521867f9ba89ea",
+   "size": 152908,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/spartan.flyglow",
+   "sha256": "3a4c81fe0a64f6c5ffa8d4b3d1befa50d625737bfe89997f0b912f75e6f3deb5",
+   "size": 102881,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/tnt.flyglow",
+   "sha256": "398c27ea61282f675f65dcd456fef442ca9f189240a6c32d4903b31d7da8dbb2",
+   "size": 66909,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/triforce.flyglow",
+   "sha256": "2d97b87a91616c756aa7cdc7d88946174e8d2eab9a72b525be56edc885cf953b",
+   "size": 300300,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/umbrella.flyglow",
+   "sha256": "89b8cf3926391a99f8e1ebbc5b1ad8d775475eea0e8e3981e08ca4e71ea728e0",
+   "size": 52009,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/undertale-soul.flyglow",
+   "sha256": "482f419e63eef922e36c6063f4f675b4bb173422ed78a3f495d1ce4af4912200",
+   "size": 127668,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/valorant.flyglow",
+   "sha256": "76e54ac421125ab945039e0517e09ecb60ec4112a224ef6ca716f4cc87e71fbd",
+   "size": 64396,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/vault-door.flyglow",
+   "sha256": "32bac7cebee34deb5761a430e4a3a7010ac58497d047b27ab5b5b3f189925e1f",
+   "size": 118038,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/void-sigil.flyglow",
+   "sha256": "51e9736d62758694013db408e4a0af435bfd3aa982896896758eb5f36a12886e",
+   "size": 77979,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "games/witcher.flyglow",
+   "sha256": "9896e8f6eb86807917f035fe8483fa0cbc18df614aa48a278a7497ddec19a026",
+   "size": 8718,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/arc-reactor.flyglow",
+   "sha256": "0aaccf1e06498627c70613d9f0d1cc62a1f1f1cb34ff348a3fdf982a469a10da",
+   "size": 230873,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/bat-joker.flyglow",
+   "sha256": "6b189961efe42b02c57e6019c8d78ea3829070ccc1fdcfea43c387366daef770",
+   "size": 35497,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/batman-v2.flyglow",
+   "sha256": "34c9181b3d8af822d804d99a0b6478016159a1127fe6a7b30ba99dcda0a3ba2d",
+   "size": 198220,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/batman.flyglow",
+   "sha256": "abf6b8498ac17c432bdc08bd2c2325e7441e56daaffa2685049c6447f35d52f2",
+   "size": 76918,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/black-panther-v2.flyglow",
+   "sha256": "69fa6f54399fc421129d6de8b59e82278debec15dda9f2592afde18d5b207e52",
+   "size": 102747,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/black-panther.flyglow",
+   "sha256": "35e442bc5d767a25174f6c3fdb2ca666e0b05c06be55813c78462de5aacdaeb4",
+   "size": 77598,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/black-widow.flyglow",
+   "sha256": "f4c1cd83f698d914674af45c9a81197075cbbd3cc45b37958e8c92501f720d25",
+   "size": 78011,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/captain-america.flyglow",
+   "sha256": "1ea0f1a2d3f71b1162a71548aeeeed78c18c85fea21c438d7894a73855b061e5",
+   "size": 147043,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/captain-marvel.flyglow",
+   "sha256": "ff85a681cf868579a85c6f320bef636ffbb0296bf446daa2458453fa35a62dc0",
+   "size": 77575,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/deadpool.flyglow",
+   "sha256": "983faeca89a6dd6dab414fd9e6c591e7642bc8d0f21c798b4ec29709bc18112a",
+   "size": 39304,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/doctor-strange.flyglow",
+   "sha256": "ab08632b790d5c45b213ca9b676ab2298cc5f1a751f7b620c9bdcd9fd0d8f5a0",
+   "size": 6851,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/eye-of-sauron.flyglow",
+   "sha256": "3b10afd772da9b30f0beadfde07659a97996272fc07ad1c6b7a96538da8c455a",
+   "size": 5734,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/flash.flyglow",
+   "sha256": "990ed45faa0a6610dffe8d53b05e6dde299e45f97c52aea1970c067db9c7adaf",
+   "size": 37315,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/green-lantern.flyglow",
+   "sha256": "30fb02477bbd4ee2007615966de8858ccd5fabafefae4291aec4073be522dea7",
+   "size": 52511,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/groot.flyglow",
+   "sha256": "a2cbf2d2dded74e69e80479d12d29d0d20e46c72a2aef17b4dcc8a42169cb8c8",
+   "size": 52340,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/harley-quinn-v2.flyglow",
+   "sha256": "d7f34ed1cad54459c8ecd88a65756dc90abc291b975390072065dd957da1b005",
+   "size": 64374,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/harley-quinn.flyglow",
+   "sha256": "ea4d4674c38d02d03cf1856dbd1fdf6f14ce0c840a0e91c3dbf87dcecdc4e600",
+   "size": 64149,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/hawkeye.flyglow",
+   "sha256": "5ebcb1f4f25e740f5d10309d3434986a008d5b09725c234c1ac66535f4ff438c",
+   "size": 102387,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/hulk.flyglow",
+   "sha256": "11f3531a102905ec8fd7d60e3efd14183648c7b53e6ccbffb5019b810d0135f2",
+   "size": 16949,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/infinity-gauntlet.flyglow",
+   "sha256": "91892f7a5e4658775e71f527ecdaf4343ff5debc7723441fe9bbf1f031d6fcc3",
+   "size": 83467,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/joker.flyglow",
+   "sha256": "391e2e74d6d118aa093ae1c3a163f9526b3909936e50551bf84b498bb63272f2",
+   "size": 96516,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/loki.flyglow",
+   "sha256": "537d5e1489c8743b26ac840ea0ca2a201343d4013e4bbcce0f5fbb50783e3190",
+   "size": 49876,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/scarlet-witch.flyglow",
+   "sha256": "0fead07e769c425e8c71d5737e1ad496f277ab01bcb1596340be44f3d5ec792c",
+   "size": 4970,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/spider-man.flyglow",
+   "sha256": "064f01cbabda995483453bf671a30334b93d74a3917415a0ab2374e50e9c109b",
+   "size": 51669,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/spider-man2.flyglow",
+   "sha256": "6d4a4615c486b40cf988e9556ec95c1fdfda977b3f8ff15ba1e179b8909cca7f",
+   "size": 51693,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/superman.flyglow",
+   "sha256": "4874285245eaabcbccafe56e907a14a6593ba2ea6ada2b2046bc8c7d618a05c3",
+   "size": 48924,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/thor.flyglow",
+   "sha256": "c9b0c51d37e96ac4cec9709c28326447c6a45fda4c639ee8b2320f0af2c11c7f",
+   "size": 72901,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/venom.flyglow",
+   "sha256": "3965944b5230bb1424ca53019895bd52640d61bdb7fbcddec4137dd4194f3802",
+   "size": 41285,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/wolverine.flyglow",
+   "sha256": "23a5a63a09dbf61ff717c8e9dc9c7756d9e852bc2d8f2b043b4c7446f4f06e81",
+   "size": 58977,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "heroes/wonder-woman.flyglow",
+   "sha256": "dc68dfc11da3abcc3d95b647e89acf57d70b0e59de927996a33e774b8fb841da",
+   "size": 64979,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "holidays/christmas.flyglow",
+   "sha256": "388566420dc02cf42589b2f01c1df7523bb32f59a619ab440756122907ab88c5",
+   "size": 76173,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "holidays/easter-bunny.flyglow",
+   "sha256": "c7c9692680b534d9e5564c95d571ead2b03331998a5b0e49c6d245754a9356a9",
+   "size": 153536,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "holidays/easter-egg.flyglow",
+   "sha256": "d83ad380399aa4ad8b5c19a8cee530a4766f0d3d99c4d0d768165372aa04d2dc",
+   "size": 8488,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "holidays/fireworks.flyglow",
+   "sha256": "43c2f571ebcbe7143a8b5cecfa9df00281e47b5c22b83c9486b7f41ed069cfd9",
+   "size": 8583,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "holidays/ghost.flyglow",
+   "sha256": "e52a2c4b597ad479c52672a997faf5a4ea0bf0661740bbb7c623129dce1543c4",
+   "size": 7059,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "holidays/lantern.flyglow",
+   "sha256": "95df3b123c9d363c1f5af241d2f436d0d56b8a6f7eb986eec08705447f9e0974",
+   "size": 40421,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "holidays/new-year.flyglow",
+   "sha256": "949770f9a0c7a4f62c5a96156340089913415b8b39c5c4f4d087ac30bfb0e7ec",
+   "size": 84006,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "holidays/pumpkin.flyglow",
+   "sha256": "fd58ccedf34a2293d44c59ea646565111fcca9a14a3a7da9dc8e0aacaa157575",
+   "size": 6220,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "holidays/snowman.flyglow",
+   "sha256": "7c329412ce5e4ced94fda89e982a2a53e4ba2fd4e1c6bcf6d550b97f19bac666",
+   "size": 33877,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "holidays/valentine-v2.flyglow",
+   "sha256": "319ec46fc9afd7d137309438288afa680449ae8d44357f057875b3f414333dd7",
+   "size": 96161,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "holidays/valentine.flyglow",
+   "sha256": "d31559180ce47f18fe04bef58f89d3a1228fa8119cb2630f8fd91f5ba137e94f",
+   "size": 2285,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "memes/doge.flyglow",
+   "sha256": "5b8b3482cea18412be4703b1c62fd5f6b1bdb8b9c60ca25190b84e83bc11c195",
+   "size": 51643,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "memes/kirby-dance.flyglow",
+   "sha256": "029d71aa883486da770c472817887c896fadf0a17e92af8ab5d58a958522db06",
+   "size": 26714,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "memes/nyan-cat.flyglow",
+   "sha256": "99b747ffb1ec73fb1aa403a17a166ae8d5b1cb0697540dc34a97fa2e5b359a40",
+   "size": 26717,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "memes/sad-pepe.flyglow",
+   "sha256": "d9bdb8aae8d601c792d89392658179ff2967654085c2453da8b71cf6c8f41286",
+   "size": 51997,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "memes/this-is-fine.flyglow",
+   "sha256": "96ae3d58553238c2eb1df9b336e051947a52101bb4d5fe35b8d9bb04425bb392",
+   "size": 12702,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "minimal/constellation.flyglow",
+   "sha256": "33b472a23ebf825f5939acd6a16a224d51b32566f5a3415e9b347c86b58a52ce",
+   "size": 270293,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "minimal/cursor.flyglow",
+   "sha256": "c4c1bf1f923f44d5e88dd5385d2b0e28b8783f3e58ca1a71b1ad5baff6ca450c",
+   "size": 156079,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "minimal/door-crack.flyglow",
+   "sha256": "3d14833719de09be2241d144e08ea06c97746df63ff335f4d660a4e0dfc8b843",
+   "size": 256753,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "minimal/edge-glow.flyglow",
+   "sha256": "c53fc8eac35a312d44669aab5a21582f0e77c4a429abb5facc8d3498059b393d",
+   "size": 194078,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "minimal/eyes-in-dark.flyglow",
+   "sha256": "66b0c5389087607aa80668fc7d60536f1cb5dab6f0a13822f4a4ddd54943ae29",
+   "size": 307933,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "minimal/one-dot.flyglow",
+   "sha256": "38240a9b394b42fe3cab955d3cf22d3cc8b4885b5f491c8867a17942d882450e",
+   "size": 384023,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "minimal/orbit.flyglow",
+   "sha256": "39464ef36a5e7d0ea3c38e887fe6fae7925f9b26351cc85acf75accc72c4f8f3",
+   "size": 307884,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "minimal/pulse-line.flyglow",
+   "sha256": "6dcfe435ceba57e7847576bba088afc583b689f5b0617140300827f172042463",
+   "size": 6057,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "minimal/ripple.flyglow",
+   "sha256": "4d629cc3c21a052a785f2897407da6ac375910721dc355c802570347eae15316",
+   "size": 289300,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "nature/aquarium.flyglow",
+   "sha256": "0208a05ae096a4b77c01b81683981bba2f74788fe24776e7e4e6aa71aed8ca5c",
+   "size": 6078,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "nature/coral-reef.flyglow",
+   "sha256": "514e39c6283973ff0047a83b7e5f9d9d106f1d73cc2937a5ef0d0fbfa0c7e711",
+   "size": 102245,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "nature/dunes-sunset.flyglow",
+   "sha256": "9ecaa93572fc499429e18ea0b3ec59bb1aa53843c8a87ee878844f31643e6979",
+   "size": 156336,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "nature/fireplace.flyglow",
+   "sha256": "c0e6bb295d71d67b03ec1554dba25179c8858c01cd5b53edd36f6c856d94ca7e",
+   "size": 7133,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "nature/forest.flyglow",
+   "sha256": "c878e061d8d3aac3006413f830856622f6b4033dd0a3041255750a63dc6c5653",
+   "size": 11937,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "nature/lava.flyglow",
+   "sha256": "fd5339b055460bc07a5e76b42077b7236a0d5920f81d5a0f90639f450c6c6ad4",
+   "size": 2516,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "nature/moon-path.flyglow",
+   "sha256": "de1ad29186ef50e54ca5731641dddfe29597ffa270a95bbcf86c606a13a58ee1",
+   "size": 6036,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "nature/northern-lights.flyglow",
+   "sha256": "e3c456364bf5d60e861d496a4fa5e48bcfe84913dcea84b301077666f63706a0",
+   "size": 22519,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "nature/rain-window.flyglow",
+   "sha256": "545de985d8788eaf4aa2e0391827296b2c668940a2b682877148b90e5786a406",
+   "size": 2736,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "nature/sakura.flyglow",
+   "sha256": "c617a4b5e528af2d1bff3a5d5d13d58c1456319c8642920ac7d54b547b5d76e3",
+   "size": 88253,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "nature/snowfall.flyglow",
+   "sha256": "ee74fc12fddcbf2d6b7be3d9afd61e48b8b5b5a274d6d101f532b200fbdf99c6",
+   "size": 127350,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "nature/sunset-sea.flyglow",
+   "sha256": "5708819d6a2faa0f8e69c4b42094314ab92a308cda80f5bdbe49a5920639a108",
+   "size": 5626,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "nature/thunderstorm.flyglow",
+   "sha256": "49175882f11d3deae185a473579d43ed1f502c7d89babaab345e97dee25c3188",
+   "size": 7858,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "nature/waterfall.flyglow",
+   "sha256": "0e12cb3a16fd96c8ecf75b8990a7b159e20f1bdeee64d744395d2ca52af416fb",
+   "size": 2419,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "retro/asteroids.flyglow",
+   "sha256": "d1c2ad37f9fefb1f990702ff780a47368576931aeb8f3c8d05f972a8d0d2e775",
+   "size": 313775,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "retro/boo.flyglow",
+   "sha256": "5538f4ed7b21138460ff4e71ed46e722929714f82f2dc7780bf9aa6019b0e1ad",
+   "size": 89862,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "retro/breakout.flyglow",
+   "sha256": "ed7afbbee577d6b1a864eaff6f384a870236e6e61904f8b5b2c57cae5562041e",
+   "size": 313581,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "retro/dino.flyglow",
+   "sha256": "49432d8386bb900cf3e38827cf323eed979a363ec0da6960f54b5671567cc958",
+   "size": 541917,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "retro/galaga.flyglow",
+   "sha256": "f590e3e0e1ad83a4f8da18d0b41ed76773b1973f5410b9ab699399821265f341",
+   "size": 364074,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "retro/mushroom.flyglow",
+   "sha256": "0fc3eba3c0ce064f6ab712cffddfdc44616bc930641d906095c85ccdeb4f524b",
+   "size": 29928,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "retro/pacman-blinky.flyglow",
+   "sha256": "a62d2dfbc5c471054f244b6a5412e1f8532e1be49c6d970e3fa833621d0d600e",
+   "size": 153308,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "retro/pacman-chase-v2.flyglow",
+   "sha256": "6c166269c54336b80027956a55cbca64859f1e4ed7d140cab5ed98a506a91be8",
+   "size": 6333,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "retro/pacman-chase.flyglow",
+   "sha256": "2159829c85aba3f8f208f8f7998c33f9b0e3b1b687bdb02bc23d32b2f27d901b",
+   "size": 2278,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "retro/pacman-clyde.flyglow",
+   "sha256": "2acea35f0129c1222a5416e25caac3ca3cb2e96a62282f136fb6d9a630da2cbb",
+   "size": 153312,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "retro/pacman-inky.flyglow",
+   "sha256": "e29c0865362611eb95754f78449fe3d7a9ad59e0a83320fe12f52f2119cdfaf4",
+   "size": 153290,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "retro/pacman-pinky.flyglow",
+   "sha256": "252711385172d9027c50538e4adb5cdf699e924ae4edcbadf9403073ca9f0432",
+   "size": 153300,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "retro/pacman.flyglow",
+   "sha256": "ec1a8ce09115d401c5781103c42b9c32df2272f2932789578d5abd46eb3053a2",
+   "size": 102272,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "retro/pong.flyglow",
+   "sha256": "d6b0ee4367e9e6011fab29ccdd6145c86c829d886e940ae99826912107348c9b",
+   "size": 283713,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "retro/snake.flyglow",
+   "sha256": "1f5a370808f8fdf2bf27d19f60530e398181dc99da86d404cb4e265b11e5f809",
+   "size": 150220,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "retro/sonic.flyglow",
+   "sha256": "1c6a38edcdda3e6f0df928ba4f40074dd7f201b85a3943fa4116c38aee01aeda",
+   "size": 61378,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "retro/space-invaders.flyglow",
+   "sha256": "abd0b5710f4fa4d5297f160f71cf99cd16672849d08cac1dfd134fbbe1709bcc",
+   "size": 102415,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "retro/synthwave.flyglow",
+   "sha256": "86922e48d0370a02d24c59ef0edbe0bf1d45f7e1f44df99bbdf8a9dc260c059d",
+   "size": 2403,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "retro/tetris.flyglow",
+   "sha256": "516b24e74e555d94b3d265dd8ece915efa0a46d572203bad75ac3ada6986630a",
+   "size": 137357,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "space/black-hole.flyglow",
+   "sha256": "8c3e97b003eda5a30c315801eda78666ca277792539a1a8e5b4e4e0c48b8986e",
+   "size": 8327,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "space/comet.flyglow",
+   "sha256": "6f24af2be6317b3272b57d9d176901dfdb07d5e899a5d4b8cb711934ee76255f",
+   "size": 7935,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "space/eclipse.flyglow",
+   "sha256": "33dac432258b1d53c903c5ea31e525342a9f76e780e6d34d9be433749a3c3c55",
+   "size": 7223,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "space/galaxy.flyglow",
+   "sha256": "1eead36ffbf0aef739bfb657149fa7b69915b41c32fca63c14a5160f75148fb0",
+   "size": 7634,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "space/pragmata.flyglow",
+   "sha256": "e0681b19029d8cf8bb89e447e0cffafa7c6a117a6ce0566d98130fdfb6907de5",
+   "size": 8499,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "space/rocket.flyglow",
+   "sha256": "25b08b49cfbe8b74b20395a7748ac9eee5b190108fd687c27a922553873837dc",
+   "size": 10133,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "space/saturn.flyglow",
+   "sha256": "6a050a0733f1522f3dc42b259b906bc6f91e52b4e5e61333d49a8a954fc8c4e4",
+   "size": 9668,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "space/ufo.flyglow",
+   "sha256": "6158912979c35d2609c6f30819b832971469333f4835a554cd6d8a7da2bcc8ab",
+   "size": 12131,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "space/warp-speed-v2.flyglow",
+   "sha256": "4cdf6e70eebe77828a4ee35aa1f8754316cbd06acccb92a0a34c429087c0e754",
+   "size": 2339,
+   "minApp": "0.3.0"
+  },
+  {
+   "path": "space/warp-speed.flyglow",
+   "sha256": "9ccb145be894d52a3a5923be24546a16f51a16c6bf129beee6ff47cbfc02d56e",
+   "size": 2287,
+   "minApp": "0.3.0"
+  }
+ ]
+}
