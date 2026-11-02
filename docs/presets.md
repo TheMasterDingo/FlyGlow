@@ -43,7 +43,7 @@ Besides the built-in presets the gallery shows:
  "version": 1,
  "preset": {
   "title": {"en": "Fox", "ru": "Лиса"},
-  "description": {"en": "An orange fox that blinks twice per loop.", "ru": "Рыжая лиса, моргает дважды за петлю."},
+  "description": {"en": "An orange fox that blinks twice per loop.", "ru": "Рыжая лиса, моргает дважды за цикл."},
   "cover": 0.3,
   "order": 10,
   "tags": ["animal", "cute"],

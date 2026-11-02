@@ -58,7 +58,7 @@
     <message>
         <location filename="../src/core/MediaEffect.cpp" line="106"/>
         <source>Plays per loop</source>
-        <translation>Проигрываний за петлю</translation>
+        <translation>Проигрываний за цикл</translation>
     </message>
     <message>
         <location filename="../src/core/Scene.cpp" line="19"/>
@@ -199,7 +199,7 @@
     <message>
         <location filename="../src/core/effects/EffectsCommon.cpp" line="103"/>
         <source>Repeats per loop</source>
-        <translation>Повторов за петлю</translation>
+        <translation>Повторов за цикл</translation>
     </message>
     <message>
         <location filename="../src/core/effects/EffectsCommon.cpp" line="108"/>
@@ -1550,7 +1550,7 @@ Strokes go into the keyframe at the playhead; if there is none, one is created. 
     <message>
         <location filename="../src/ui/MainWindow.cpp" line="305"/>
         <source>Length of the animation loop. The dock repeats it endlessly.</source>
-        <translation>Длина петли анимации. Док повторяет её бесконечно.</translation>
+        <translation>Длина цикла анимации. Док повторяет его бесконечно.</translation>
     </message>
     <message>
         <location filename="../src/ui/MainWindow.cpp" line="306"/>
@@ -1829,7 +1829,7 @@ The download page lists what is new and has the installer and the portable zip.<
     <message>
         <location filename="../src/ui/MainWindow.cpp" line="1063"/>
         <source>Drag below the ruler to select part of the loop</source>
-        <translation>Чтобы выделить часть петли, протяните мышью под шкалой секунд</translation>
+        <translation>Чтобы выделить часть цикла, протяните мышью под шкалой секунд</translation>
     </message>
     <message>
         <location filename="../src/ui/MainWindow.cpp" line="1192"/>
@@ -1839,7 +1839,7 @@ The download page lists what is new and has the installer and the portable zip.<
     <message>
         <location filename="../src/ui/MainWindow.cpp" line="1196"/>
         <source>To the dock: %1 frames · step %2 ms (%3 fps) · loop %4 s</source>
-        <translation>В док уйдёт кадров: %1 · шаг %2 мс (%3 к/с) · петля %4 с</translation>
+        <translation>В док уйдёт кадров: %1 · шаг %2 мс (%3 к/с) · цикл %4 с</translation>
     </message>
     <message>
         <location filename="../src/ui/MainWindow.cpp" line="1221"/>
@@ -2221,7 +2221,7 @@ The download page lists what is new and has the installer and the portable zip.<
     <message>
         <location filename="../src/ui/MediaImportDialog.cpp" line="514"/>
         <source>Set the scene&apos;s loop length to the length of the clip</source>
-        <translation>Сделать длину петли сцены равной длине ролика</translation>
+        <translation>Сделать длину цикла сцены равной длине ролика</translation>
     </message>
     <message>
         <location filename="../src/ui/MediaImportDialog.cpp" line="515"/>
@@ -2387,11 +2387,11 @@ The download page lists what is new and has the installer and the portable zip.<
     </message>
     <message>
         <source>From the dock spreads its frames over the scene&apos;s loop.</source>
-        <translation type="vanished">В стиле «С дока» кадры растягиваются на всю петлю сцены.</translation>
+        <translation type="vanished">В стиле «С дока» кадры растягиваются на весь цикл сцены.</translation>
     </message>
     <message>
         <source>%1 frames · loop %2 s</source>
-        <translation type="vanished">Кадров: %1 · петля %2 с</translation>
+        <translation type="vanished">Кадров: %1 · цикл %2 с</translation>
     </message>
     <message>
         <source>Still · 1 frame</source>
@@ -2463,7 +2463,7 @@ The download page lists what is new and has the installer and the portable zip.<
     <message>
         <location filename="../src/ui/PresetBrowser.cpp" line="205"/>
         <source>Save current scene…</source>
-        <translation>Сохранить текущую сцену…</translation>
+        <translation>Сохранить сцену…</translation>
     </message>
     <message>
         <location filename="../src/ui/PresetBrowser.cpp" line="206"/>
@@ -2503,12 +2503,12 @@ The download page lists what is new and has the installer and the portable zip.<
     <message>
         <location filename="../src/ui/PresetBrowser.cpp" line="385"/>
         <source>No presets of your own yet. Open or make a scene, then click “Save current scene…” on the left.</source>
-        <translation>Своих пресетов пока нет. Откройте или соберите сцену и нажмите «Сохранить текущую сцену…» слева.</translation>
+        <translation>Своих пресетов пока нет. Откройте или соберите сцену и нажмите «Сохранить сцену…» слева.</translation>
     </message>
     <message>
         <location filename="../src/ui/PresetBrowser.cpp" line="417"/>
         <source>%1 · loop %2 s</source>
-        <translation>%1 · петля %2 с</translation>
+        <translation>%1 · цикл %2 с</translation>
     </message>
     <message>
         <location filename="../src/ui/PresetBrowser.cpp" line="422"/>
