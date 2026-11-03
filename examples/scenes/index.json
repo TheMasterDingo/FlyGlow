@@ -334,14 +334,14 @@
   },
   {
    "path": "emoji/deal-with-it-v2.flyglow",
-   "sha256": "0df4721f17c34a392f9e24f81641e6e70eef5ab6fe10c31a2f66865bb8e739c8",
-   "size": 73541,
+   "sha256": "91573e7726c64095462892d6c4c71162b389f7a7aa23fdc1e3eeb0387db33f4d",
+   "size": 43966,
    "minApp": "0.3.0"
   },
   {
    "path": "emoji/deal-with-it.flyglow",
-   "sha256": "a2db02ef50c8800a1d43e2a45083d315a5e4f418c36ae0be62349b386603ead5",
-   "size": 39107,
+   "sha256": "da1f74ef91c24aff347a1ef289067d25155988a64447e7677eb5bebe935c0593",
+   "size": 41101,
    "minApp": "0.3.0"
   },
   {
@@ -370,8 +370,8 @@
   },
   {
    "path": "emoji/hundred.flyglow",
-   "sha256": "20e631f84b8f5a1cc1b4286211d563edd46274868da6ae94e012d7e3af7edb34",
-   "size": 39105,
+   "sha256": "ae15689ba408eef1e8d42379fda0688693357ad186b9dab77e40fa7e92b36053",
+   "size": 4834,
    "minApp": "0.3.0"
   },
   {
@@ -466,8 +466,8 @@
   },
   {
    "path": "games/apex-legends.flyglow",
-   "sha256": "aad8244ba4aaac1b85c34c11053e0a87eecaedc4467f9ed724d0ad9f7bdb1aae",
-   "size": 64424,
+   "sha256": "4a5e76af5532688f9dd5574b7fcaf70a1cc58929b52fcc7f62f47ddddedd80d1",
+   "size": 4942,
    "minApp": "0.3.0"
   },
   {
@@ -526,8 +526,8 @@
   },
   {
    "path": "games/corvo-mask.flyglow",
-   "sha256": "0735a1313c8d01fcf832dcb4a5c72ee8a2fa608b0de87ada7d3602ae02d956c3",
-   "size": 77771,
+   "sha256": "c1afd57734accea033433c35011953f50669ab906bb080a6c8f29fcbfa0ba5af",
+   "size": 79761,
    "minApp": "0.3.0"
   },
   {
@@ -580,8 +580,8 @@
   },
   {
    "path": "games/doom-slayer.flyglow",
-   "sha256": "0cb4684a7dd5070b30bd149dfacca675c6bbdae30a0567cfad31a58c048d9b12",
-   "size": 64405,
+   "sha256": "8c87ffb57d636a620bff4528f9ea3dd2f2ca02e8d5acbbf250947a7cf3ab9013",
+   "size": 6401,
    "minApp": "0.3.0"
   },
   {
@@ -652,8 +652,8 @@
   },
   {
    "path": "games/league-of-legends.flyglow",
-   "sha256": "87f8b7e3ad567101c20071b82bd7dd2e59adf0ee298ce609a3bea6c164b7bfa7",
-   "size": 64469,
+   "sha256": "05396f7aa49eb9572777d3549a87c2693ddebc145644fd129ed82a3c36ae9a48",
+   "size": 4987,
    "minApp": "0.3.0"
   },
   {
@@ -748,8 +748,8 @@
   },
   {
    "path": "games/overwatch.flyglow",
-   "sha256": "06f817bd8b61911775c66448f6c33a4b7831332935a074f53af489d384e90cad",
-   "size": 64403,
+   "sha256": "92d35e529157604b2bc463788a9cc940477f6208d57493b4f448a3c02849abca",
+   "size": 4921,
    "minApp": "0.3.0"
   },
   {
@@ -784,8 +784,8 @@
   },
   {
    "path": "games/spartan.flyglow",
-   "sha256": "3a4c81fe0a64f6c5ffa8d4b3d1befa50d625737bfe89997f0b912f75e6f3deb5",
-   "size": 102881,
+   "sha256": "2ab43f137d2524c416d1b7763648564bf7dab9af050d25a77cb914b08f4aff08",
+   "size": 44667,
    "minApp": "0.3.0"
   },
   {
@@ -796,8 +796,8 @@
   },
   {
    "path": "games/triforce.flyglow",
-   "sha256": "2d97b87a91616c756aa7cdc7d88946174e8d2eab9a72b525be56edc885cf953b",
-   "size": 300300,
+   "sha256": "0bf12c4ce9a257dd70fb14c9ba98166bec644bbee4ccfd894027c2f53986491e",
+   "size": 273875,
    "minApp": "0.3.0"
   },
   {
@@ -814,8 +814,8 @@
   },
   {
    "path": "games/valorant.flyglow",
-   "sha256": "76e54ac421125ab945039e0517e09ecb60ec4112a224ef6ca716f4cc87e71fbd",
-   "size": 64396,
+   "sha256": "175e0195c5420ce0fbc392b34ae23e54c927ee5ebaf46d27f46abd6d65c8e606",
+   "size": 4914,
    "minApp": "0.3.0"
   },
   {
@@ -856,8 +856,8 @@
   },
   {
    "path": "heroes/batman.flyglow",
-   "sha256": "abf6b8498ac17c432bdc08bd2c2325e7441e56daaffa2685049c6447f35d52f2",
-   "size": 76918,
+   "sha256": "87411d8f7920ca1f1eabd9a417fa493fe8983f1356c79f10ae3ecf0a137be099",
+   "size": 4815,
    "minApp": "0.3.0"
   },
   {
@@ -880,8 +880,8 @@
   },
   {
    "path": "heroes/captain-america.flyglow",
-   "sha256": "1ea0f1a2d3f71b1162a71548aeeeed78c18c85fea21c438d7894a73855b061e5",
-   "size": 147043,
+   "sha256": "15bdd53fcb4ac0412f2193a2dd3771a7cb237c25beb14bf3471c78854bb3d9c7",
+   "size": 107969,
    "minApp": "0.3.0"
   },
   {
@@ -928,14 +928,14 @@
   },
   {
    "path": "heroes/harley-quinn-v2.flyglow",
-   "sha256": "d7f34ed1cad54459c8ecd88a65756dc90abc291b975390072065dd957da1b005",
-   "size": 64374,
+   "sha256": "34040b4943b79b1182bd6001e1447630ea9107dea04bc524294e2c75997e66a7",
+   "size": 6370,
    "minApp": "0.3.0"
   },
   {
    "path": "heroes/harley-quinn.flyglow",
-   "sha256": "ea4d4674c38d02d03cf1856dbd1fdf6f14ce0c840a0e91c3dbf87dcecdc4e600",
-   "size": 64149,
+   "sha256": "fc99aa641c3c27e20a7ba787ee14f132ca3fb2d5b65cec2c686aaa0ba09bf665",
+   "size": 4669,
    "minApp": "0.3.0"
   },
   {
@@ -958,14 +958,14 @@
   },
   {
    "path": "heroes/joker.flyglow",
-   "sha256": "391e2e74d6d118aa093ae1c3a163f9526b3909936e50551bf84b498bb63272f2",
-   "size": 96516,
+   "sha256": "e339336c59a7fe68575b9cd325538fb97a7c35a5b7abbee002fbbb4e10c428a1",
+   "size": 98483,
    "minApp": "0.3.0"
   },
   {
    "path": "heroes/loki.flyglow",
-   "sha256": "537d5e1489c8743b26ac840ea0ca2a201343d4013e4bbcce0f5fbb50783e3190",
-   "size": 49876,
+   "sha256": "56d8250a55d974c94b84d9afc01cfa23b6c36b52de4576b02cd7afc7a6c065b8",
+   "size": 10799,
    "minApp": "0.3.0"
   },
   {
@@ -988,8 +988,8 @@
   },
   {
    "path": "heroes/superman.flyglow",
-   "sha256": "4874285245eaabcbccafe56e907a14a6593ba2ea6ada2b2046bc8c7d618a05c3",
-   "size": 48924,
+   "sha256": "e4a575e9dae7676ade5b1f51715d16941ed19d94dd688266bc15fb5e18f216e1",
+   "size": 5208,
    "minApp": "0.3.0"
   },
   {
@@ -1012,8 +1012,8 @@
   },
   {
    "path": "heroes/wonder-woman.flyglow",
-   "sha256": "dc68dfc11da3abcc3d95b647e89acf57d70b0e59de927996a33e774b8fb841da",
-   "size": 64979,
+   "sha256": "dfe06e12829c8a051f4d1eb1ca549d97fa30cab1d9748e510219a8eb80fd3f55",
+   "size": 7091,
    "minApp": "0.3.0"
   },
   {
